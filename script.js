@@ -1,7 +1,10 @@
 // CONFIGURATION
-const CSV_URL = 'TON_LIEN_GOOGLE_SHEET_CSV_ICI'; 
-const APPS_SCRIPT_URL = 'TON_LIEN_GOOGLE_APPS_SCRIPT_WEB_APP_ICI'; // Voir Etape 4
-const WHATSAPP_PHONE = '33612345678'; // Numéro du restaurateur (format inter)
+// Tes liens ont été intégrés ici :
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7lTNMQNNmgQrlsBbtD0lsq4emQqNVoeVUxpgG2WFLOgopD_z6u5fQ6S31krFBuTqiwFfUX6nU6O7g/pub?gid=0&single=true&output=csv'; 
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec'; 
+
+// Remplace par ton numéro ou celui du client (format international sans le +)
+const WHATSAPP_PHONE = '33612345678'; 
 
 let menuData = [];
 let cart = [];
@@ -17,15 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error("Erreur chargement menu:", err));
 });
 
-// Parseur CSV simple (sans librairie)
+// Parseur CSV simple
 function parseCSV(str) {
     const lines = str.split('\n').filter(l => l.trim() !== '');
     const headers = lines[0].split(',').map(h => h.trim());
     
     return lines.slice(1).map(line => {
-        // Regex pour gérer les virgules dans les guillemets
         const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-        // Nettoyage des guillemets
         const cleanValues = values.map(val => val.replace(/^"|"$/g, '').trim());
         
         let obj = {};
@@ -39,9 +40,13 @@ function renderMenu(items) {
     const container = document.getElementById('menu-container');
     container.innerHTML = '';
     
-    // Grouper par catégorie
     const categories = [...new Set(items.map(i => i.Categorie))];
     
+    if (categories.length === 0) {
+        container.innerHTML = '<p>Aucun article trouvé. Vérifiez le Google Sheet.</p>';
+        return;
+    }
+
     categories.forEach(cat => {
         if(!cat) return;
         const catItems = items.filter(i => i.Categorie === cat);
@@ -56,7 +61,7 @@ function renderMenu(items) {
                     <p class="item-desc">${item.Description || ''}</p>
                     <span class="item-price">${item.Prix} €</span>
                 </div>
-                <button class="add-btn" onclick="addToCart('${item.Nom}', ${parseFloat(item.Prix)})">+</button>
+                <button class="add-btn" onclick="addToCart('${item.Nom.replace(/'/g, "\\'")}', ${parseFloat(item.Prix)})">+</button>
             </div>`;
         });
         
@@ -91,7 +96,6 @@ function updateCartUI() {
     document.getElementById('cart-count').innerText = count;
     document.getElementById('cart-total').innerText = total.toFixed(2) + ' €';
     
-    // Remplir la liste dans la modale
     const cartList = document.getElementById('cart-items');
     if(cart.length === 0) {
         cartList.innerHTML = '<p class="empty-msg">Votre panier est vide.</p>';
@@ -100,9 +104,9 @@ function updateCartUI() {
             <div class="cart-item">
                 <span>${item.name}</span>
                 <div class="qty-controls">
-                    <button onclick="removeFromCart('${item.name}')">-</button>
+                    <button onclick="removeFromCart('${item.name.replace(/'/g, "\\'")}')">-</button>
                     <span>${item.qty}</span>
-                    <button onclick="addToCart('${item.name}', ${item.price})">+</button>
+                    <button onclick="addToCart('${item.name.replace(/'/g, "\\'")}', ${item.price})">+</button>
                 </div>
                 <span>${(item.price * item.qty).toFixed(2)}€</span>
             </div>
@@ -115,7 +119,7 @@ function toggleCart() {
     modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
 }
 
-// 4. GÉNÉRATION ID COMMANDE & DATA
+// 4. DATA & ENVOI
 function getOrderData() {
     const table = document.getElementById('table-num').value;
     const client = document.getElementById('client-name').value;
@@ -128,14 +132,11 @@ function getOrderData() {
 
     const orderId = '#CMD-' + Math.floor(Math.random() * 10000);
     const total = document.getElementById('cart-total').innerText;
-    
-    // Résumé texte
     let details = cart.map(i => `${i.qty}x ${i.name}`).join(', ');
 
     return { orderId, table, client, note, total, details, cart };
 }
 
-// --- OPTION A : WHATSAPP ---
 function sendOrderWhatsApp() {
     const data = getOrderData();
     if(!data) return;
@@ -154,7 +155,6 @@ function sendOrderWhatsApp() {
     window.open(url, '_blank');
 }
 
-// --- OPTION B : GOOGLE APPS SCRIPT ---
 function sendOrderAppsScript() {
     const data = getOrderData();
     if(!data) return;
@@ -163,7 +163,7 @@ function sendOrderAppsScript() {
     btn.innerText = 'Envoi en cours...';
     btn.disabled = true;
 
-    // Utilisation de no-cors car on ne peut pas lire la réponse d'un script Google sans domaine
+    // Utilisation de no-cors
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors', 
@@ -178,9 +178,15 @@ function sendOrderAppsScript() {
         toggleCart();
         btn.innerText = 'Envoyer en Cuisine';
         btn.disabled = false;
+        
+        // Optionnel : vider le formulaire
+        document.getElementById('table-num').value = '';
+        document.getElementById('client-name').value = '';
+        document.getElementById('client-note').value = '';
+        
     }).catch(err => {
         console.error(err);
-        alert("Erreur lors de l'envoi.");
+        alert("Erreur technique lors de l'envoi.");
         btn.disabled = false;
     });
 }
