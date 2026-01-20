@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Restaurant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="banner">
+            <h1>Le Petit Gourmet</h1>
+            <p>Cuisine maison & produits frais</p>
+        </div>
+    </header>
+
+    <main id="menu-container">
+        <div class="loader">Chargement du menu...</div>
+    </main>
+
+    <div id="floating-cart-btn" onclick="toggleCart()">
+        <i class="fas fa-shopping-basket"></i>
+        <span id="cart-count">0</span>
+        <span>Voir le panier</span>
+    </div>
+
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleCart()">&times;</span>
+            <h2>Votre Panier</h2>
+            <div id="cart-items">
+                <p class="empty-msg">Votre panier est vide.</p>
+            </div>
+            
+            <div class="cart-footer">
+                <div class="total-row">
+                    <span>Total</span>
+                    <span id="cart-total">0.00 €</span>
+                </div>
+
+                <form id="order-form">
+                    <input type="text" id="table-num" placeholder="Numéro de Table" required>
+                    <input type="text" id="client-name" placeholder="Votre Nom" required>
+                    <textarea id="client-note" placeholder="Commentaire (cuisson, allergies...)"></textarea>
+                    
+                    <h3>Choisir méthode d'envoi :</h3>
+                    <button type="button" class="btn-whatsapp" onclick="sendOrderWhatsApp()">
+                        <i class="fab fa-whatsapp"></i> Envoyer via WhatsApp
+                    </button>
+                    <button type="button" class="btn-order" onclick="sendOrderAppsScript()">
+                        <i class="fas fa-paper-plane"></i> Envoyer en Cuisine
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
