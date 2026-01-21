@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dossier Technique - Solution Menu Digital</title>
+    <style>
+        /* CONFIGURATION POUR IMPRESSION A4 */
+        @page {
+            size: A4;
+            margin: 2.5cm;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #333;
+            max-width: 21cm;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+        }
+        
+        /* EN-TÊTE */
+        header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .doc-title {
+            font-size: 18pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #2c3e50;
+        }
+        .doc-subtitle {
+            font-size: 10pt;
+            color: #666;
+            margin-top: 5px;
+        }
+        .meta-info {
+            text-align: right;
+            font-size: 10pt;
+        }
+
+        /* CORPS DU TEXTE */
+        h1 {
+            font-size: 14pt;
+            color: #2c3e50;
+            border-left: 5px solid #2c3e50;
+            padding-left: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        h2 {
+            font-size: 12pt;
+            color: #444;
+            margin-top: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        p {
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+        ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* TABLEAUX PRO */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 10pt;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        /* BOUTON D'IMPRESSION (Invisible sur le PDF) */
+        .no-print {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #e8f4fd;
+            border: 1px solid #b6dbf9;
+            border-radius: 5px;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <strong>Mode d'emploi :</strong> Cliquez droit sur cette page > Imprimer > Destination : "Enregistrer au format PDF".
+    </div>
+
+    <header>
+        <div>
+            <div class="doc-title">Dossier Technique & Fonctionnel</div>
+            <div class="doc-subtitle">Solution de Menu Digital & Commande QR Code</div>
+        </div>
+        <div class="meta-info">
+            <strong>Date :</strong> 21 Janvier 2026<br>
+            <strong>Émetteur :</strong> Ny Avo RAFIDISON<br>
+            <strong>Destinataire :</strong> ORTUS Sarlu (Madagascar)
+        </div>
+    </header>
+
+    <p>Ce document constitue la réponse technique officielle aux éléments requis pour la commercialisation de la solution "Menu Digital" à Madagascar. Il définit le périmètre fonctionnel, les prérequis techniques et le cadre de maintenance.</p>
+
+    <h1>1. Fiche Produit & Périmètre</h1>
+
+    <h2>2.1 Identité du Produit</h2>
+    <ul>
+        <li><strong>Nom suggéré :</strong> Gourmet.mg (ou Digital Menu MG)</li>
+        <li><strong>Description :</strong> Interface web de commande instantanée pour restaurant, accessible via QR Code, connectée en temps réel à un écran cuisine.</li>
+        <li><strong>Proposition de valeur (Pitch) :</strong> Une solution qui supprime les coûts de réimpression des menus, accélère le service et sécurise l'encaissement, sans nécessiter d'investissement matériel coûteux.</li>
+    </ul>
+
+    <h2>2.2 Périmètre Fonctionnel (Inclus)</h2>
+    <p>La solution actuelle, fonctionnelle et testée, comprend :</p>
+    <ul>
+        <li><strong>Menu Client :</strong> Affichage catégorisé (Entrées, Plats, Boissons) avec photos, descriptions et prix en Ariary.</li>
+        <li><strong>Prise de commande :</strong> Panier virtuel avec calcul automatique du total (MGA).</li>
+        <li><strong>Interface Cuisine (KDS) :</strong> Réception des commandes en temps réel avec alerte visuelle. Gestion de file d'attente.</li>
+        <li><strong>Gestion des statuts :</strong> Fonctionnalité "Servi/Terminé" avec archivage local (mémoire cache) pour éviter les doublons.</li>
+        <li><strong>Back-Office :</strong> Gestion autonome des prix et produits via Google Sheets (Excel).</li>
+        <li><strong>Export Comptable :</strong> Journal des ventes automatique et historisé.</li>
+    </ul>
+
+    <p><em>Exclusions (Non inclus à ce jour) : Paiement mobile en ligne (MVola/Orange Money), Gestion de stock décrémentale, Impression ticket thermique.</em></p>
+
+    <h1>2. Prérequis Techniques (Madagascar)</h1>
+
+    <table style="width: 100%;">
+        <tr>
+            <th style="width: 30%;">Élément</th>
+            <th>Spécification Requise</th>
+        </tr>
+        <tr>
+            <td>Connexion Internet</td>
+            <td>Requise (3G/4G stable ou ADSL/Fibre). Solution à faible consommation de bande passante (fichiers textes légers).</td>
+        </tr>
+        <tr>
+            <td>Matériel Restaurant</td>
+            <td>1 Smartphone ou Tablette (Android ou iOS) pour la cuisine. N'importe quel modèle avec un navigateur web (Chrome/Safari) suffit.</td>
+        </tr>
+        <tr>
+            <td>Infrastructure</td>
+            <td>Solution "Cloud" reposant sur l'écosystème Google (Drive, Sheets). Sécurité assurée par les serveurs Google.</td>
+        </tr>
+        <tr>
+            <td>Mode Dégradé</td>
+            <td>En cas de coupure Internet : Le menu reste consultable si déjà chargé, mais l'envoi de commande nécessite le rétablissement du réseau.</td>
+        </tr>
+    </table>
+
+    <h1>3. Processus Standard d'Installation</h1>
+    <p>Temps estimé par établissement : <strong>45 à 60 minutes</strong>.</p>
+    <ol>
+        <li><strong>Configuration Compte :</strong> Création d'un compte Google dédié au restaurant (ex: <em>resto.nom@gmail.com</em>).</li>
+        <li><strong>Base de données :</strong> Copie du fichier maître "Google Sheet" sur le Drive du client.</li>
+        <li><strong>Saisie Menu :</strong> Remplissage des plats, prix (Ariary) et liens photos.</li>
+        <li><strong>Déploiement Script :</strong> Installation du code serveur (Apps Script) via copier-coller (procédure fournie).</li>
+        <li><strong>Génération QR :</strong> Création du QR Code unique lié à l'URL générée.</li>
+    </ol>
+
+    <h1>4. Recommandations Économiques</h1>
+    <ul>
+        <li><strong>Modèle :</strong> Vente "Pack Installation" (Paiement unique) + Contrat de Maintenance optionnel.</li>
+        <li><strong>Devise :</strong> Ariary (MGA).</li>
+        <li><strong>Liberté tarifaire :</strong> ORTUS Sarlu dispose de la liberté totale de fixation des prix finaux selon la typologie du client.</li>
+    </ul>
+
+    <h1>5. Matrice des Responsabilités</h1>
+    <p>Conformément à la demande, voici la répartition des rôles pour garantir la stabilité du service :</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Domaine d'intervention</th>
+                <th style="text-align: center;">Développeur (France)</th>
+                <th style="text-align: center;">Distributeur (Madagascar)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Maintenance corrective (Bugs code)</td>
+                <td style="text-align: center;">✔ (Niveau 2)</td>
+                <td style="text-align: center;">✖</td>
+            </tr>
+            <tr>
+                <td>Évolutions produit & Mises à jour</td>
+                <td style="text-align: center;">✔</td>
+                <td style="text-align: center;">✖</td>
+            </tr>
+            <tr>
+                <td>Installation & Paramétrage</td>
+                <td style="text-align: center;">✖</td>
+                <td style="text-align: center;">✔</td>
+            </tr>
+            <tr>
+                <td>Formation Client & Staff</td>
+                <td style="text-align: center;">✖</td>
+                <td style="text-align: center;">✔</td>
+            </tr>
+            <tr>
+                <td>Support Quotidien (Niveau 1)</td>
+                <td style="text-align: center;">✖</td>
+                <td style="text-align: center;">✔</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h1>6. Roadmap & Conclusion</h1>
+    <p>La version actuelle (V1) est stable et prête à la commercialisation. Les évolutions futures (V2) pourront inclure des filtres de recherche avancés et une gestion multi-langues pour les touristes, selon les retours terrain collectés par ORTUS Sarlu.</p>
+    
+    <p style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px;">
+        <em>Document généré pour validation officielle.</em>
+    </p>
+
+</body>
+</html>
