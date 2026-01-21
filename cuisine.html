@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header><div class="banner"><h1>👨‍🍳 Interface Cuisine</h1></div></header>
+    <header><div class="banner"><h1>👨‍🍳 Écran Cuisine</h1></div></header>
 
     <div class="kitchen-container">
         <div class="refresh-bar">
@@ -18,31 +18,30 @@
     </div>
 
     <script>
-        // LIENS CONFIGURÉS
-        const CSV_COMMANDES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7lTNMQNNmgQrlsBbtD0lsq4emQqNVoeVUxpgG2WFLOgopD_z6u5fQ6S31krFBuTqiwFfUX6nU6O7g/pub?gid=1409508146&single=true&output=csv';
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec';
+        // TES LIENS ICI
+        const CSV_COMMANDES_URL = 'TON_LIEN_CSV_COMMANDES_ICI';
+        const APPS_SCRIPT_URL = 'TON_LIEN_APPS_SCRIPT_ICI';
 
         document.addEventListener('DOMContentLoaded', loadOrders);
 
         function loadOrders() {
             document.getElementById('orders-list').innerHTML = '<p style="text-align:center">Actualisation...</p>';
-            // Ajout d'un paramètre &t=Date pour éviter que le navigateur garde le vieux CSV en mémoire
             fetch(CSV_COMMANDES_URL + '&t=' + Date.now()) 
                 .then(res => res.text())
                 .then(text => {
                     const orders = parseCSV(text);
                     renderOrders(orders);
-                })
-                .catch(err => document.getElementById('orders-list').innerHTML = '<p>Erreur chargement.</p>');
+                });
         }
 
         function renderOrders(orders) {
             const container = document.getElementById('orders-list');
             container.innerHTML = '';
             
-            // Inversion pour avoir les commandes récentes en haut
-            orders.reverse().forEach(order => {
-                // Vérifie que la ligne a bien un ID (évite les lignes vides)
+            // On ne garde que ce qui est "En cuisine" (Colonne H, index statuts)
+            const activeOrders = orders.filter(o => !o.Statut || o.Statut === "En cuisine");
+
+            activeOrders.reverse().forEach(order => {
                 if(!order.ID_Commande) return;
 
                 const div = document.createElement('div');
@@ -60,35 +59,31 @@
                         ${order.Commentaire ? `<span style="color:#d35400">⚠️ ${order.Commentaire}</span>` : ''}
                     </div>
                     <div style="margin-top:15px; overflow:hidden;">
-                        <button class="btn-done" onclick="completeOrder('${order.ID_Commande}', this)">
-                            <i class="fas fa-check"></i> Prêt / Supprimer
+                        <button class="btn-done" style="background-color:#f39c12;" onclick="markAsServed('${order.ID_Commande}', this)">
+                            <i class="fas fa-bell"></i> Prêt / Envoyer en salle
                         </button>
                     </div>
                 `;
                 container.appendChild(div);
             });
             
-            if(container.innerHTML === '') container.innerHTML = '<p style="text-align:center">Aucune commande en cours.</p>';
+            if(activeOrders.length === 0) container.innerHTML = '<p style="text-align:center">Tout est calme chef !</p>';
         }
 
-        function completeOrder(id, btnElement) {
-            if(!confirm("Supprimer la commande " + id + " ?")) return;
-            
-            btnElement.innerText = "Suppression...";
+        function markAsServed(id, btnElement) {
+            btnElement.innerText = "Envoi...";
             btnElement.disabled = true;
 
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ action: 'delete', orderId: id })
+                body: JSON.stringify({ action: 'serve', orderId: id }) // Action 'serve'
             }).then(() => {
-                // Effet visuel immédiat
                 btnElement.closest('.order-card').style.opacity = '0.3';
-                // On recharge après 2 secondes pour être sûr que le Sheet a eu le temps de supprimer la ligne
                 setTimeout(loadOrders, 2000); 
             }).catch(err => {
-                alert("Erreur lors de la suppression");
+                alert("Erreur réseau");
                 btnElement.disabled = false;
             });
         }
