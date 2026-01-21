@@ -24,6 +24,10 @@
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec';
 
         document.addEventListener('DOMContentLoaded', loadOrders);
+        // Actualise automatiquement toutes les 30 secondes (30000 millisecondes)
+
+        setInterval(loadOrders, 30000);
+
 
         function loadOrders() {
             document.getElementById('orders-list').innerHTML = '<p style="text-align:center">Actualisation...</p>';
