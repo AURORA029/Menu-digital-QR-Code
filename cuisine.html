@@ -27,13 +27,11 @@
         // --- ACTUALISATION AUTOMATIQUE ---
         document.addEventListener('DOMContentLoaded', () => {
             loadOrders();
-            // Lance l'actualisation toutes les 15 secondes (15000 ms)
-            setInterval(loadOrders, 15000);
+            setInterval(loadOrders, 15000); // 15 secondes
             startTimer();
         });
 
         function loadOrders() {
-            // Petit effet pour montrer que ça charge sans tout effacer brutalement
             const btnIcon = document.querySelector('.refresh-btn i');
             if(btnIcon) btnIcon.classList.add('fa-spin');
 
@@ -43,7 +41,6 @@
                     const orders = parseCSV(text);
                     renderOrders(orders);
                     if(btnIcon) btnIcon.classList.remove('fa-spin');
-                    // Reset du timer visuel
                     timeLeft = 15;
                 })
                 .catch(err => {
@@ -56,18 +53,13 @@
             const container = document.getElementById('orders-list');
             container.innerHTML = '';
             
-            // 1. Récupérer la "Liste Noire" locale (les commandes finies sur ce téléphone)
             const localFinished = JSON.parse(localStorage.getItem('finished_orders') || '[]');
 
             const activeOrders = orders.filter(o => {
                 const statut = (o.Statut || "").toLowerCase().trim();
                 const id = o.ID_Commande;
-
-                // FILTRE DOUBLE SÉCURITÉ :
-                // On cache SI le Sheet dit "Servi" OU SI le téléphone dit "C'est fini"
                 if (statut.includes("servi")) return false;
                 if (localFinished.includes(id)) return false;
-                
                 return true;
             });
 
@@ -86,8 +78,14 @@
                     </div>
                     <div class="order-meta">
                         <span>👤 ${order.Client}</span>
-                        ${order.Commentaire ? `<span style="color:#d35400">⚠️ ${order.Commentaire}</span>` : ''}
                     </div>
+                    
+                    ${order.Commentaire ? `
+                        <div style="background-color:#fff3cd; color:#856404; padding:8px; border-radius:5px; margin-top:10px; font-weight:bold; white-space: pre-wrap; border-left: 4px solid #ffeeba;">
+                            <i class="fas fa-exclamation-circle"></i> ${order.Commentaire}
+                        </div>
+                    ` : ''}
+
                     <div style="margin-top:15px; overflow:hidden;">
                         <button class="btn-done" onclick="markAsServed('${order.ID_Commande}', this)">
                             <i class="fas fa-check"></i> Terminé / Servir
@@ -106,14 +104,12 @@
             btnElement.innerText = "Traitement...";
             btnElement.disabled = true;
 
-            // 1. AJOUT IMMÉDIAT A LA MÉMOIRE LOCALE (Le téléphone se souvient)
             let localFinished = JSON.parse(localStorage.getItem('finished_orders') || '[]');
             if(!localFinished.includes(id)) {
                 localFinished.push(id);
                 localStorage.setItem('finished_orders', JSON.stringify(localFinished));
             }
 
-            // 2. Envoi à Google Sheets (pour la postérité)
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -121,7 +117,6 @@
                 body: JSON.stringify({ action: 'serve', orderId: id })
             });
 
-            // 3. Animation de sortie
             const card = btnElement.closest('.order-card');
             card.style.transition = "all 0.5s ease";
             card.style.opacity = "0";
@@ -129,7 +124,6 @@
             
             setTimeout(() => {
                 card.remove();
-                // Vérif si vide
                 const container = document.getElementById('orders-list');
                 if(container.children.length === 0) {
                      container.innerHTML = '<p style="text-align:center; margin-top:50px; color:#888; font-size:1.2em;"><i class="fas fa-mug-hot"></i><br>Tout est servi !</p>';
@@ -137,7 +131,6 @@
             }, 500);
         }
 
-        // Petit compte à rebours visuel (Bonus UX)
         let timeLeft = 15;
         function startTimer() {
             setInterval(() => {
@@ -148,12 +141,21 @@
             }, 1000);
         }
 
+        // --- NOUVEAU PARSEUR CSV INTELLIGENT ---
+        // Il ne coupe plus les phrases s'il y a une virgule entre guillemets
         function parseCSV(str) {
             const lines = str.split('\n').filter(l => l.trim() !== '');
             const headers = lines[0].split(',').map(h => h.trim());
+            
             return lines.slice(1).map(line => {
-                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-                const cleanValues = values.map(val => val.replace(/^"|"$/g, '').trim());
+                // Cette Regex magique coupe aux virgules, SAUF celles entre guillemets
+                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                
+                const cleanValues = values.map(val => {
+                    // On nettoie les guillemets autour et on enlève les espaces
+                    return val.trim().replace(/^"|"$/g, '').replace(/""/g, '"');
+                });
+                
                 let obj = {};
                 headers.forEach((h, i) => obj[h] = cleanValues[i] || '');
                 return obj;
