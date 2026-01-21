@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caisse - Le Petit Gourmet</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Un peu de style spécifique pour l'argent */
+        .price-tag { font-size: 1.5rem; font-weight: bold; color: var(--primary); display:block; margin: 10px 0; }
+        .btn-pay { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <header><div class="banner"><h1>💶 Caisse & Paiement</h1></div></header>
+
+    <div class="kitchen-container">
+        <div class="refresh-bar">
+            <button class="refresh-btn" onclick="loadOrders()"><i class="fas fa-sync"></i> Actualiser</button>
+        </div>
+        <div id="orders-list">Chargement...</div>
+    </div>
+
+    <script>
+        // TES LIENS ICI (LES MÊMES QUE DANS CUISINE)
+        const CSV_COMMANDES_URL = 'TON_LIEN_CSV_COMMANDES_ICI';
+        const APPS_SCRIPT_URL = 'TON_LIEN_APPS_SCRIPT_ICI';
+
+        document.addEventListener('DOMContentLoaded', loadOrders);
+
+        function loadOrders() {
+            document.getElementById('orders-list').innerHTML = '<p style="text-align:center">Recherche des tables servies...</p>';
+            fetch(CSV_COMMANDES_URL + '&t=' + Date.now()) 
+                .then(res => res.text())
+                .then(text => {
+                    const orders = parseCSV(text);
+                    renderOrders(orders);
+                });
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('orders-list');
+            container.innerHTML = '';
+            
+            // FILTRE : On ne veut QUE les commandes "Servi"
+            const servedOrders = orders.filter(o => o.Statut === "Servi");
+
+            servedOrders.forEach(order => {
+                if(!order.ID_Commande) return;
+
+                const div = document.createElement('div');
+                div.className = 'order-card';
+                // Bordure verte pour dire "C'est prêt à payer"
+                div.style.borderLeftColor = "#27ae60"; 
+                
+                div.innerHTML = `
+                    <div class="order-header">
+                        <span>${order.ID_Commande}</span>
+                        <span>Table ${order.Table}</span>
+                    </div>
+                    <div class="order-details">
+                        ${order.Details}
+                    </div>
+                    <span class="price-tag">À Encaisser : ${order.Total}</span>
+                    <div class="order-meta">
+                        <span>👤 ${order.Client}</span>
+                    </div>
+                    <div style="margin-top:15px;">
+                        <button class="btn-pay" onclick="processPayment('${order.ID_Commande}', this)">
+                            <i class="fas fa-cash-register"></i> Encaisser & Clôturer
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            if(servedOrders.length === 0) container.innerHTML = '<p style="text-align:center">Aucune table en attente de paiement.</p>';
+        }
+
+        function processPayment(id, btnElement) {
+            if(!confirm("Confirmer le paiement de la commande " + id + " ?\nCela la supprimera de la liste.")) return;
+            
+            btnElement.innerText = "Traitement...";
+            btnElement.disabled = true;
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'pay', orderId: id }) // Action 'pay' = supprimer
+            }).then(() => {
+                btnElement.closest('.order-card').style.opacity = '0';
+                setTimeout(loadOrders, 2000); 
+            }).catch(err => {
+                alert("Erreur de connexion");
+                btnElement.disabled = false;
+            });
+        }
+
+        function parseCSV(str) {
+            const lines = str.split('\n').filter(l => l.trim() !== '');
+            const headers = lines[0].split(',').map(h => h.trim());
+            return lines.slice(1).map(line => {
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                const cleanValues = values.map(val => val.replace(/^"|"$/g, '').trim());
+                let obj = {};
+                headers.forEach((h, i) => obj[h] = cleanValues[i]);
+                return obj;
+            });
+        }
+    </script>
+</body>
+</html>
