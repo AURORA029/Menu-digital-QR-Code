@@ -1,10 +1,10 @@
 // CONFIGURATION
-// Tes liens EXACTS sont ici :
+// Tes liens EXACTS :
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7lTNMQNNmgQrlsBbtD0lsq4emQqNVoeVUxpgG2WFLOgopD_z6u5fQ6S31krFBuTqiwFfUX6nU6O7g/pub?gid=0&single=true&output=csv'; 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec'; 
 
-// Ton numéro (ou celui du client)
-const WHATSAPP_PHONE = '33612345678'; 
+// Ton numéro WhatsApp (format international sans le +)
+const WHATSAPP_PHONE = '33619896526'; 
 
 let menuData = [];
 let cart = [];
@@ -15,30 +15,36 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.text())
         .then(csvText => {
             menuData = parseCSV(csvText);
-            renderMenu(); // On lance le rendu
+            renderMenu();
         })
         .catch(err => console.error("Erreur chargement menu:", err));
 
-    // Création dynamique du "Toast" (notification) pour ne pas toucher au HTML
+    // Toast notification
     const toast = document.createElement('div');
     toast.id = 'toast';
     document.body.appendChild(toast);
 });
 
-// Parseur CSV (Identique à ta version)
+// --- LE NOUVEAU PARSEUR CSV (Celui qui corrige le bug des noms coupés) ---
 function parseCSV(str) {
     const lines = str.split('\n').filter(l => l.trim() !== '');
     const headers = lines[0].split(',').map(h => h.trim());
+    
     return lines.slice(1).map(line => {
-        const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-        const cleanValues = values.map(val => val.replace(/^"|"$/g, '').trim());
+        // Cette formule ne coupe plus au milieu des mots ou des espaces
+        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        
+        const cleanValues = values.map(val => {
+            return val.trim().replace(/^"|"$/g, '').replace(/""/g, '"');
+        });
+        
         let obj = {};
-        headers.forEach((h, i) => obj[h] = cleanValues[i]);
+        headers.forEach((h, i) => obj[h] = cleanValues[i] || '');
         return obj;
     });
 }
 
-// 2. RENDU DU MENU (AMÉLIORÉ AVEC COMPTEURS)
+// 2. RENDU DU MENU
 function renderMenu() {
     const container = document.getElementById('menu-container');
     container.innerHTML = '';
@@ -54,17 +60,12 @@ function renderMenu() {
         if(!cat) return;
         
         let html = `<h2 class="category-title">${cat}</h2>`;
-        
-        // On filtre les items de cette catégorie
         const catItems = menuData.filter(i => i.Categorie === cat);
         
         catItems.forEach(item => {
-            // On vérifie si l'item est déjà dans le panier pour afficher la quantité
             const qty = getQtyInCart(item.Nom);
             const imgTag = item.ImageURL ? `<img src="${item.ImageURL}" class="item-img" alt="${item.Nom}">` : '';
 
-            // LOGIQUE DES BOUTONS :
-            // Si quantité > 0, on affiche [- 1 +], sinon juste [+]
             let controlsHtml = '';
             if (qty > 0) {
                 controlsHtml = `
@@ -95,35 +96,30 @@ function renderMenu() {
     });
 }
 
-// Helper pour savoir combien on en a dans le panier
 function getQtyInCart(name) {
     const item = cart.find(i => i.name === name);
     return item ? item.qty : 0;
 }
 
-// 3. GESTION UNIFIÉE DU PANIER (+ et -)
-// Cette fonction remplace "addToCart" et "removeFromCart"
+// 3. GESTION PANIER
 function updateQty(name, change) {
     const itemData = menuData.find(i => i.Nom === name);
     const existing = cart.find(i => i.name === name);
 
     if (existing) {
         existing.qty += change;
-        // Si on descend à 0, on le retire du panier
         if (existing.qty <= 0) {
             cart = cart.filter(i => i.name !== name);
         }
     } else if (change > 0) {
-        // Nouvel ajout
         cart.push({ name: name, price: parseFloat(itemData.Prix), qty: 1 });
-        showToast(`${name} ajouté au panier`); // Petit message pop-up
+        showToast(`${name} ajouté au panier`);
     }
     
     updateCartUI();
-    renderMenu(); // IMPORTANT : On recharge le menu pour mettre à jour les boutons [+ -] sur les cartes
+    renderMenu();
 }
 
-// Affiche le petit message noir temporaire
 function showToast(message) {
     const x = document.getElementById("toast");
     if(x) {
@@ -138,7 +134,8 @@ function updateCartUI() {
     const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     
     document.getElementById('cart-count').innerText = count;
-    document.getElementById('cart-total').innerText = total + ' Ar';;
+    // PAS DE DECIMALES POUR L'ARIARY
+    document.getElementById('cart-total').innerText = total + ' Ar';
     
     const cartList = document.getElementById('cart-items');
     if(cart.length === 0) {
@@ -160,7 +157,6 @@ function updateCartUI() {
 
 function toggleCart() {
     const modal = document.getElementById('cart-modal');
-    // Si on ferme la modale, on vérifie si c'était le message de succès pour recharger la page
     if (modal.style.display === 'flex' && document.querySelector('.success-modal')) {
         location.reload(); 
     }
@@ -201,7 +197,6 @@ function sendOrderWhatsApp() {
     window.open(url, '_blank');
 }
 
-// ENVOI VERS GOOGLE SHEETS (Back Office)
 function sendOrderAppsScript() {
     const data = getOrderData();
     if(!data) return;
@@ -217,12 +212,10 @@ function sendOrderAppsScript() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     }).then(() => {
-        // SUCCÈS : On vide le panier
         cart = [];
         updateCartUI();
-        renderMenu(); // Remet les boutons à zéro sur le menu
+        renderMenu(); 
         
-        // On remplace le contenu de la modale par le message de succès (Pop-up)
         const modalContent = document.querySelector('.modal-content');
         modalContent.innerHTML = `
             <div class="success-modal">
