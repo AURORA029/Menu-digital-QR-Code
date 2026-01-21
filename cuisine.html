@@ -18,7 +18,8 @@
     </div>
 
     <script>
-        // TES LIENS ICI
+        // --- CONFIGURATION ---
+        // Mets ici tes liens (les mêmes que d'habitude)
         const CSV_COMMANDES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7lTNMQNNmgQrlsBbtD0lsq4emQqNVoeVUxpgG2WFLOgopD_z6u5fQ6S31krFBuTqiwFfUX6nU6O7g/pub?gid=1409508146&single=true&output=csv';
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec';
 
@@ -26,11 +27,16 @@
 
         function loadOrders() {
             document.getElementById('orders-list').innerHTML = '<p style="text-align:center">Actualisation...</p>';
+            // On ajoute l'heure pour forcer le navigateur à ne pas utiliser le cache
             fetch(CSV_COMMANDES_URL + '&t=' + Date.now()) 
                 .then(res => res.text())
                 .then(text => {
                     const orders = parseCSV(text);
                     renderOrders(orders);
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('orders-list').innerHTML = '<p style="text-align:center; color:red">Erreur de chargement</p>';
                 });
         }
 
@@ -38,10 +44,17 @@
             const container = document.getElementById('orders-list');
             container.innerHTML = '';
             
-            // On ne garde que ce qui est "En cuisine" (Colonne H, index statuts)
-            const activeOrders = orders.filter(o => !o.Statut || o.Statut === "En cuisine");
+            // --- LE FILTRE MAGIQUE ---
+            // On garde la commande SI le statut n'est PAS "Servi"
+            const activeOrders = orders.filter(o => {
+                // On nettoie le texte (enlève les espaces autour) pour être sûr
+                const statut = (o.Statut || "").trim();
+                return statut !== "Servi";
+            });
 
+            // On inverse pour voir les nouvelles commandes en haut
             activeOrders.reverse().forEach(order => {
+                // Sécurité : on ignore les lignes vides sans ID
                 if(!order.ID_Commande) return;
 
                 const div = document.createElement('div');
@@ -59,63 +72,64 @@
                         ${order.Commentaire ? `<span style="color:#d35400">⚠️ ${order.Commentaire}</span>` : ''}
                     </div>
                     <div style="margin-top:15px; overflow:hidden;">
-                        <button class="btn-done" style="background-color:#f39c12;" onclick="markAsServed('${order.ID_Commande}', this)">
-                            <i class="fas fa-bell"></i> Prêt / Envoyer en salle
+                        <button class="btn-done" onclick="markAsServed('${order.ID_Commande}', this)">
+                            <i class="fas fa-check"></i> Terminé / Servir
                         </button>
                     </div>
                 `;
                 container.appendChild(div);
             });
             
-            if(activeOrders.length === 0) container.innerHTML = '<p style="text-align:center">Tout est calme chef !</p>';
+            if(activeOrders.length === 0) {
+                container.innerHTML = '<p style="text-align:center; margin-top:20px; color:#888;">Aucune commande en attente ! 👨‍🍳</p>';
+            }
         }
 
         function markAsServed(id, btnElement) {
-            btnElement.innerText = "Envoi...";
+            // 1. Changement visuel immédiat (Feedback utilisateur)
+            btnElement.innerText = "En cours...";
             btnElement.disabled = true;
 
+            // 2. Envoi de la requête à Google Sheets
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ action: 'serve', orderId: id })
             }).then(() => {
-                // UX : On supprime l'élément VISUELLEMENT tout de suite
+                // 3. Animation de disparition
                 const card = btnElement.closest('.order-card');
                 card.style.transition = "all 0.5s ease";
                 card.style.opacity = "0";
-                card.style.transform = "translateX(100px)"; // Petite animation de sortie
+                card.style.transform = "translateX(50px)";
                 
-                // On attend que l'animation finisse pour retirer du DOM
+                // 4. Suppression du DOM après l'animation
                 setTimeout(() => {
                     card.remove();
-                    // On vérifie s'il reste des commandes
+                    // Vérifier s'il reste des commandes pour afficher le message "Aucune commande"
                     const container = document.getElementById('orders-list');
                     if(container.children.length === 0) {
-                        container.innerHTML = '<p style="text-align:center">Tout est calme chef !</p>';
+                        container.innerHTML = '<p style="text-align:center; margin-top:20px; color:#888;">Aucune commande en attente ! 👨‍🍳</p>';
                     }
                 }, 500);
-
-                // ATTENTION : On NE recharge PAS la liste (loadOrders) tout de suite
-                // car le CSV Google met du temps à se mettre à jour.
-                // On laisse l'utilisateur le faire manuellement plus tard s'il veut.
-                
             }).catch(err => {
-                alert("Erreur réseau, réessayez.");
-                btnElement.innerText = "Prêt / Envoyer en salle";
+                alert("Erreur de connexion internet");
                 btnElement.disabled = false;
+                btnElement.innerText = "Réessayer";
             });
         }
 
-
+        // Parseur CSV Robuste
         function parseCSV(str) {
             const lines = str.split('\n').filter(l => l.trim() !== '');
             const headers = lines[0].split(',').map(h => h.trim());
             return lines.slice(1).map(line => {
+                // Cette expression régulière gère correctement les virgules DANS les guillemets
                 const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
                 const cleanValues = values.map(val => val.replace(/^"|"$/g, '').trim());
+                
                 let obj = {};
-                headers.forEach((h, i) => obj[h] = cleanValues[i]);
+                headers.forEach((h, i) => obj[h] = cleanValues[i] || '');
                 return obj;
             });
         }
