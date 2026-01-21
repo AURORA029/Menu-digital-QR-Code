@@ -78,15 +78,35 @@
                 method: 'POST',
                 mode: 'no-cors',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ action: 'serve', orderId: id }) // Action 'serve'
+                body: JSON.stringify({ action: 'serve', orderId: id })
             }).then(() => {
-                btnElement.closest('.order-card').style.opacity = '0.3';
-                setTimeout(loadOrders, 2000); 
+                // UX : On supprime l'élément VISUELLEMENT tout de suite
+                const card = btnElement.closest('.order-card');
+                card.style.transition = "all 0.5s ease";
+                card.style.opacity = "0";
+                card.style.transform = "translateX(100px)"; // Petite animation de sortie
+                
+                // On attend que l'animation finisse pour retirer du DOM
+                setTimeout(() => {
+                    card.remove();
+                    // On vérifie s'il reste des commandes
+                    const container = document.getElementById('orders-list');
+                    if(container.children.length === 0) {
+                        container.innerHTML = '<p style="text-align:center">Tout est calme chef !</p>';
+                    }
+                }, 500);
+
+                // ATTENTION : On NE recharge PAS la liste (loadOrders) tout de suite
+                // car le CSV Google met du temps à se mettre à jour.
+                // On laisse l'utilisateur le faire manuellement plus tard s'il veut.
+                
             }).catch(err => {
-                alert("Erreur réseau");
+                alert("Erreur réseau, réessayez.");
+                btnElement.innerText = "Prêt / Envoyer en salle";
                 btnElement.disabled = false;
             });
         }
+
 
         function parseCSV(str) {
             const lines = str.split('\n').filter(l => l.trim() !== '');
