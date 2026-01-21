@@ -140,3 +140,25 @@ input, textarea {
 .btn-order {
     width: 100%; background: var(--primary); color: white; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
 }
+/* Ajout pour les images */
+.menu-item {
+    /* On garde flex, mais on s'assure que ça s'aligne bien */
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+}
+
+.item-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover; /* Recadre l'image sans la déformer */
+    border-radius: 8px;
+    margin-right: 15px; /* Espace entre image et texte */
+    order: -1; /* Place l'image à gauche (optionnel, sinon enlève cette ligne) */
+}
+
+/* Ajustement mobile pour garder de la place */
+.item-info {
+    flex: 1; /* Prend tout l'espace restant */
+    padding-right: 10px;
+}
