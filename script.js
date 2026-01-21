@@ -54,8 +54,12 @@ function renderMenu(items) {
         let html = `<h2 class="category-title">${cat}</h2>`;
         
         catItems.forEach(item => {
+            // Vérifie si une image existe, sinon chaîne vide
+            const imgTag = item.ImageURL ? `<img src="${item.ImageURL}" class="item-img" alt="${item.Nom}">` : '';
+
             html += `
             <div class="menu-item">
+                ${imgTag}
                 <div class="item-info">
                     <h3>${item.Nom}</h3>
                     <p class="item-desc">${item.Description || ''}</p>
@@ -64,6 +68,7 @@ function renderMenu(items) {
                 <button class="add-btn" onclick="addToCart('${item.Nom.replace(/'/g, "\\'")}', ${parseFloat(item.Prix)})">+</button>
             </div>`;
         });
+
         
         container.innerHTML += html;
     });
