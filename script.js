@@ -83,7 +83,7 @@ function renderMenu() {
                 <div class="item-info">
                     <h3>${item.Nom}</h3>
                     <p class="item-desc">${item.Description || ''}</p>
-                    <span class="item-price">${item.Prix} €</span>
+                    <span class="item-price">${item.Prix} Ar</span>
                 </div>
                 <div class="action-area">
                     ${controlsHtml}
@@ -138,7 +138,7 @@ function updateCartUI() {
     const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     
     document.getElementById('cart-count').innerText = count;
-    document.getElementById('cart-total').innerText = total.toFixed(2) + ' €';
+    document.getElementById('cart-total').innerText = total + ' Ar';;
     
     const cartList = document.getElementById('cart-items');
     if(cart.length === 0) {
@@ -152,7 +152,7 @@ function updateCartUI() {
                     <span>${item.qty}</span>
                     <button onclick="updateQty('${item.name.replace(/'/g, "\\'")}', 1)">+</button>
                 </div>
-                <span>${(item.price * item.qty).toFixed(2)}€</span>
+                <span>${item.price * item.qty} Ar</span>
             </div>
         `).join('');
     }
@@ -192,7 +192,7 @@ function sendOrderWhatsApp() {
     let text = `*Nouvelle Commande ${data.orderId}*\n`;
     text += `👤 ${data.client} - Table ${data.table}\n----------------\n`;
     data.cart.forEach(item => {
-        text += `${item.qty}x ${item.name} (${(item.price * item.qty).toFixed(2)}€)\n`;
+        text += `${item.qty}x ${item.name} (${item.price * item.qty} Ar)\n`;
     });
     text += `----------------\n*TOTAL: ${data.total}*\n`;
     if(data.note) text += `📝 Note: ${data.note}`;
