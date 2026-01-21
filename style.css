@@ -162,3 +162,74 @@ input, textarea {
     flex: 1; /* Prend tout l'espace restant */
     padding-right: 10px;
 }
+/* --- AJOUTS UX --- */
+
+/* Compteur sur la fiche produit */
+.item-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0f0f0;
+    padding: 5px;
+    border-radius: 20px;
+}
+.item-controls button {
+    width: 28px; height: 28px;
+    border-radius: 50%; border: none;
+    background: white; cursor: pointer;
+    font-weight: bold; color: var(--primary);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.item-qty { font-weight: bold; min-width: 20px; text-align: center; }
+
+/* Toast Notification (Petit message temporaire) */
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 50px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+}
+#toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 100px;
+}
+
+/* Modal de Succès (Joli popup de fin) */
+.success-modal {
+    text-align: center;
+    padding: 40px 20px;
+}
+.success-icon {
+    font-size: 50px; color: #25D366; margin-bottom: 20px;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn { from{transform: scale(0);} to{transform: scale(1);} }
+
+/* --- STYLE POUR LA PAGE CUISINE --- */
+.kitchen-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+.order-card {
+    background: white; border-left: 5px solid var(--primary);
+    padding: 20px; margin-bottom: 20px; border-radius: 8px;
+    box-shadow: var(--shadow); position: relative;
+}
+.order-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; color: #555; }
+.order-details { font-size: 1.1rem; margin-bottom: 15px; }
+.order-meta { font-size: 0.9rem; color: #888; display: flex; gap: 15px; }
+.btn-done {
+    background: #e74c3c; color: white; border: none; padding: 10px 20px;
+    border-radius: 5px; cursor: pointer; float: right;
+}
+.refresh-bar { text-align: center; margin-bottom: 20px; }
+.refresh-btn { background: var(--dark); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
