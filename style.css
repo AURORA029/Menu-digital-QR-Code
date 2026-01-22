@@ -2,281 +2,320 @@
     --primary: #00ccbc; /* Vert style Deliveroo */
     --dark: #2e3333;
     --light: #f9fafa;
-    --shadow: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow: 0 4px 12px rgba(0,0,0,0.08); /* Ombre plus douce et moderne */
+    --frais: #00d2d3; /* Cyan pour le badge FRAIS */
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* Police style iPhone/Insta */
     background-color: var(--light);
     margin: 0;
-    padding-bottom: 80px; /* Espace pour le bouton flottant */
+    padding-bottom: 90px;
     color: var(--dark);
+    -webkit-font-smoothing: antialiased; /* Rendu texte plus net */
 }
 
+/* --- HEADER --- */
 header .banner {
     background: white;
-    padding: 20px;
+    padding: 15px 20px;
     text-align: center;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #eee;
+    /* On retire l'ombre ici pour laisser la place à la barre de nav */
 }
 
-h1 { margin: 0; font-size: 1.5rem; }
-h2 { font-size: 1.2rem; margin-top: 20px; border-bottom: 2px solid var(--primary); display: inline-block; }
+h1 { margin: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: none; font-weight: 800; color: #333; }
 
-/* Menu List */
+/* --- NOUVEAU : NAVIGATION "INSTAGRAM" (Sticky) --- */
+.category-nav {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    background: white;
+    padding: 12px 10px;
+    position: sticky;
+    top: 0; /* Colle en haut */
+    z-index: 90;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    -webkit-overflow-scrolling: touch;
+}
+/* Cache la barre de scroll moche */
+.category-nav::-webkit-scrollbar { display: none; }
+
+.cat-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 0 6px;
+    border-radius: 20px;
+    background: #f4f6f8;
+    color: #555;
+    font-size: 0.9em;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.cat-btn:hover { background: #e0e0e0; }
+.cat-btn:active, .cat-btn:focus {
+    background: var(--dark);
+    color: white;
+    transform: scale(0.98);
+}
+
+/* --- BARRE DE RECHERCHE --- */
+.search-wrapper {
+    background: white;
+    padding: 10px 15px 15px 15px;
+}
+#search-input {
+    background: #f4f6f8;
+    border: none;
+    font-size: 16px;
+}
+#search-input:focus {
+    background: white;
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 204, 188, 0.15);
+}
+
+/* --- LISTE DES PLATS --- */
 #menu-container { padding: 15px; max-width: 600px; margin: 0 auto; }
 
 .category-title {
     margin-top: 30px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-size: 1.3rem;
-    font-weight: bold;
+    font-weight: 800;
 }
 
 .menu-item {
     background: white;
-    border-radius: 12px;
-    padding: 15px;
+    border-radius: 16px; /* Coins plus ronds style iOS */
+    padding: 12px;
     margin-bottom: 15px;
     box-shadow: var(--shadow);
     display: flex;
-    justify-content: space-between;
+    flex-direction: row; 
     align-items: center;
+    position: relative; /* Pour le badge */
+    transition: transform 0.1s;
+    border: 1px solid rgba(0,0,0,0.03);
 }
 
-.item-info h3 { margin: 0 0 5px 0; font-size: 1rem; }
-.item-desc { font-size: 0.85rem; color: #666; margin: 0 0 10px 0; }
-.item-price { font-weight: bold; color: var(--dark); }
+.menu-item:active { transform: scale(0.99); }
 
+/* Image */
+.item-img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-right: 15px;
+    order: -1;
+    background-color: #eee; /* Placeholder gris si pas d'image */
+}
+
+/* Infos Texte */
+.item-info {
+    flex: 1;
+    padding-right: 10px;
+    min-height: 90px; /* Assure une hauteur mini */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.item-info h3 { 
+    margin: 0 0 4px 0; 
+    font-size: 1.05rem; 
+    font-weight: 700; 
+    line-height: 1.3;
+}
+.item-desc { 
+    font-size: 0.85rem; 
+    color: #777; 
+    margin: 0 0 8px 0; 
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Coupe le texte trop long après 2 lignes */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.item-price { font-weight: 700; color: var(--dark); font-size: 1rem; }
+
+/* Boutons Ajout */
 .add-btn {
     background: var(--primary);
     color: white;
     border: none;
-    padding: 8px 15px;
-    border-radius: 20px;
+    width: 35px; height: 35px; /* Rond parfait */
+    border-radius: 50%;
     cursor: pointer;
     font-weight: bold;
+    font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0, 204, 188, 0.3);
 }
 
-/* Floating Button */
+.item-controls {
+    display: flex; align-items: center; gap: 8px;
+    background: white; border: 1px solid #eee;
+    padding: 3px; border-radius: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.item-controls button {
+    width: 30px; height: 30px;
+    border-radius: 50%; border: none;
+    background: #f4f6f8; cursor: pointer;
+    font-weight: bold; color: var(--dark);
+    display: flex; align-items: center; justify-content: center;
+}
+.item-controls button:hover { background: #e0e0e0; }
+.item-qty { font-weight: bold; min-width: 15px; text-align: center; font-size: 0.9rem; }
+
+/* --- BOUTON PANIER FLOTTANT --- */
 #floating-cart-btn {
     position: fixed;
-    bottom: 20px;
+    bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--dark);
     color: white;
-    padding: 15px 30px;
-    border-radius: 30px;
+    padding: 16px 25px;
+    border-radius: 50px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    justify-content: space-between;
+    gap: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
     cursor: pointer;
     z-index: 100;
-    width: 80%;
-    justify-content: center;
+    width: 90%;
+    max-width: 400px;
+    font-weight: 600;
+    backdrop-filter: blur(10px); /* Effet verre fumé si supporté */
 }
 
 #cart-count {
     background: var(--primary);
-    padding: 2px 8px;
+    color: white;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
     border-radius: 50%;
     font-size: 0.8rem;
+    font-weight: bold;
 }
 
-/* Modal */
+/* --- MODAL / PANIER --- */
 .modal {
     display: none;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     z-index: 200;
-    align-items: flex-end; /* Mobile bottom sheet style */
+    align-items: flex-end;
+    backdrop-filter: blur(3px);
 }
 
 .modal-content {
     background: white;
     width: 100%;
     max-height: 90vh;
-    border-radius: 20px 20px 0 0;
-    padding: 20px;
+    border-radius: 24px 24px 0 0;
+    padding: 25px;
     box-sizing: border-box;
     overflow-y: auto;
-    animation: slideUp 0.3s ease;
+    animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Animation fluide */
 }
 
 @keyframes slideUp { from {transform: translateY(100%);} to {transform: translateY(0);} }
 
-.close-btn { float: right; font-size: 1.5rem; cursor: pointer; }
-
-/* Cart Items */
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+.close-btn { 
+    background: #f0f0f0; width: 30px; height: 30px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center;
+    float: right; cursor: pointer; font-size: 1rem; color: #555;
 }
 
-.qty-controls button {
-    background: #eee; border: none; width: 25px; height: 25px; border-radius: 50%; cursor: pointer;
-}
-
-/* Form */
+/* Formulaire */
 input, textarea {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-sizing: border-box;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
 }
-
-.btn-whatsapp {
-    width: 100%; background: #25D366; color: white; padding: 15px; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer;
+input:focus, textarea:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
 }
 
 .btn-order {
-    width: 100%; background: var(--primary); color: white; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-}
-/* Ajout pour les images */
-.menu-item {
-    /* On garde flex, mais on s'assure que ça s'aligne bien */
-    display: flex;
-    flex-direction: row; 
-    align-items: center;
+    background: var(--dark);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.item-img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover; /* Recadre l'image sans la déformer */
-    border-radius: 8px;
-    margin-right: 15px; /* Espace entre image et texte */
-    order: -1; /* Place l'image à gauche (optionnel, sinon enlève cette ligne) */
-}
-
-/* Ajustement mobile pour garder de la place */
-.item-info {
-    flex: 1; /* Prend tout l'espace restant */
-    padding-right: 10px;
-}
-/* --- AJOUTS UX --- */
-
-/* Compteur sur la fiche produit */
-.item-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #f0f0f0;
-    padding: 5px;
-    border-radius: 20px;
-}
-.item-controls button {
-    width: 28px; height: 28px;
-    border-radius: 50%; border: none;
-    background: white; cursor: pointer;
-    font-weight: bold; color: var(--primary);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.item-qty { font-weight: bold; min-width: 20px; text-align: center; }
-
-/* Toast Notification (Petit message temporaire) */
-#toast {
-    visibility: hidden;
-    min-width: 250px;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 50px;
-    padding: 16px;
-    position: fixed;
-    z-index: 1000;
-    left: 50%;
-    bottom: 90px;
-    transform: translateX(-50%);
-    font-size: 14px;
-    opacity: 0;
-    transition: opacity 0.5s, bottom 0.5s;
-}
-#toast.show {
-    visibility: visible;
-    opacity: 1;
-    bottom: 100px;
-}
-
-/* Modal de Succès (Joli popup de fin) */
-.success-modal {
-    text-align: center;
-    padding: 40px 20px;
-}
-.success-icon {
-    font-size: 50px; color: #25D366; margin-bottom: 20px;
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-@keyframes popIn { from{transform: scale(0);} to{transform: scale(1);} }
-
-/* --- STYLE POUR LA PAGE CUISINE --- */
-.kitchen-container { max-width: 800px; margin: 0 auto; padding: 20px; }
-.order-card {
-    background: white; border-left: 5px solid var(--primary);
-    padding: 20px; margin-bottom: 20px; border-radius: 8px;
-    box-shadow: var(--shadow); position: relative;
-}
-.order-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; color: #555; }
-.order-details { font-size: 1.1rem; margin-bottom: 15px; }
-.order-meta { font-size: 0.9rem; color: #888; display: flex; gap: 15px; }
-.btn-done {
-    background: #e74c3c; color: white; border: none; padding: 10px 20px;
-    border-radius: 5px; cursor: pointer; float: right;
-}
-.refresh-bar { text-align: center; margin-bottom: 20px; }
-.refresh-btn { background: var(--dark); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
-.menu-item.exhausted {
-    opacity: 0.6;
-    filter: grayscale(100%); /* Rend l'image en noir et blanc */
-}
-#search-input:focus {
-    border-color: #00ccbc; /* Mets ici la couleur principale d'ORTUS/Client */
-    box-shadow: 0 0 5px rgba(0, 204, 188, 0.3);
-}
-/* Le conteneur de l'image doit être "relative" pour que l'étiquette se place par rapport à lui */
-.menu-item {
-    position: relative; /* Sécurité */
-}
-
-/* Le style de base du badge */
+/* --- BADGES (ÉTIQUETTES) --- */
 .badge {
     position: absolute;
     top: 10px;
-    right: 10px; /* Coin haut droit de la carte */
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.75em;
-    font-weight: bold;
+    right: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7em;
+    font-weight: 800;
     color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     z-index: 10;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap; /* EMPÊCHE DE COUPER LE MOT EN DEUX */
 }
 
-/* Les couleurs selon le type */
-.badge-promo { background-color: #e74c3c; } /* Rouge */
-.badge-new { background-color: #3498db; }   /* Bleu */
-.badge-hot { background-color: #d35400; }   /* Orange foncé */
-.badge-vege { background-color: #27ae60; }  /* Vert */
-.badge-top { background-color: #f1c40f; color: #333; } /* Jaune */
-/* Couleur par défaut pour les tags inconnus (ex: "Local", "Sucré"...) */
-.badge-default { 
-    background-color: #333; /* Noir/Gris foncé */
-    color: white;
-}
-
-/* Rappel des autres couleurs pour être sûr */
+/* Couleurs des badges */
 .badge-promo { background-color: #e74c3c; } 
 .badge-new { background-color: #3498db; }
-.badge-hot { background-color: #d35400; }
+.badge-hot { background-color: #ff6b6b; }
 .badge-vege { background-color: #27ae60; }
 .badge-top { background-color: #f1c40f; color: #333; }
 
+/* LE CORRECTIF POUR "FRAIS" OU "FRESH" */
+.badge-frais, .badge-fresh { 
+    background-color: var(--frais); 
+    color: white;
+}
+
+/* Par défaut (Gris foncé) */
+.badge-default { background-color: #333; }
+
+/* Rupture de stock */
+.menu-item.exhausted {
+    opacity: 0.6;
+    filter: grayscale(100%);
+    background: #fafafa;
+}
+.add-btn.disabled {
+    background: #ccc;
+    box-shadow: none;
+    width: auto; height: auto;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+/* --- NOTIFICATIONS & MODAL SUCCÈS --- */
+#toast {
+    background-color: rgba(46, 51, 51, 0.95);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.success-icon {
+    font-size: 60px; color: var(--primary); margin-bottom: 20px;
+}
