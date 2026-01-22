@@ -66,12 +66,11 @@ function filterMenu() {
     renderMenu(filteredData);
 }
 
-// ================= RENDU DU MENU (AVEC GESTION STOCK) =================
+// ================= RENDU DU MENU (AVEC STOCK & BADGES) =================
 function renderMenu(data = menuData) {
     const container = document.getElementById('menu-container');
     container.innerHTML = '';
     
-    // Si recherche vide
     if (data.length === 0) {
         container.innerHTML = `
             <div style="text-align:center; padding: 40px; color:#888;">
@@ -93,23 +92,36 @@ function renderMenu(data = menuData) {
             const imgTag = item.ImageURL ? `<img src="${item.ImageURL}" class="item-img" alt="${item.Nom}" loading="lazy">` : '';
             const safeName = item.Nom.replace(/'/g, "\\'");
 
-            // --- C'EST ICI QUE TU AVAIS PERDU LA LOGIQUE STOCK ---
+            // --- 1. GESTION DES BADGES (TAGS) ---
+            let badgeHtml = '';
+            const rawTag = (item.Tag || '').trim(); // ex: "Sakay"
             
-            // 1. Vérification disponibilité (Dispo = 'Non' dans Excel ?)
+            if (rawTag.length > 0) {
+                const tagUpper = rawTag.toUpperCase();
+                let badgeClass = 'badge-default'; // Couleur par défaut (Noir)
+                let displayIcon = ''; 
+
+                if (tagUpper === 'PROMO') { badgeClass = 'badge-promo'; }
+                else if (tagUpper === 'NEW' || tagUpper === 'NOUVEAU') { badgeClass = 'badge-new'; }
+                else if (tagUpper === 'VEGE' || tagUpper === 'VEGAN') { badgeClass = 'badge-vege'; displayIcon = '🌿 '; }
+                else if (tagUpper === 'TOP' || tagUpper === 'BEST') { badgeClass = 'badge-top'; displayIcon = '★ '; }
+                else if (tagUpper === 'HOT' || tagUpper === 'SPICY' || tagUpper === 'SAKAY') { 
+                    badgeClass = 'badge-hot'; 
+                    displayIcon = '🌶️ '; 
+                }
+
+                badgeHtml = `<span class="badge ${badgeClass}">${displayIcon}${rawTag}</span>`;
+            }
+
+            // --- 2. GESTION DU STOCK ---
             const dispo = (item.Dispo || 'OUI').trim().toUpperCase();
             const isAvailable = dispo !== 'NON'; 
-
-            // 2. Classe CSS pour griser si épuisé
             const cardClass = isAvailable ? "menu-item" : "menu-item exhausted";
 
-            // 3. Logique des boutons
             let controlsHtml = '';
-            
             if (!isAvailable) {
-                // CAS : RUPTURE DE STOCK
                 controlsHtml = `<button class="add-btn disabled" disabled style="background:#ccc; cursor:not-allowed; border:none; color:#666;">Épuisé</button>`;
             } else if (qty > 0) {
-                // CAS : DÉJÀ AU PANIER
                 controlsHtml = `
                 <div class="item-controls">
                     <button onclick="updateQty('${safeName}', -1)">-</button>
@@ -117,14 +129,13 @@ function renderMenu(data = menuData) {
                     <button onclick="updateQty('${safeName}', 1)">+</button>
                 </div>`;
             } else {
-                // CAS : DISPONIBLE
                 controlsHtml = `<button class="add-btn" onclick="updateQty('${safeName}', 1)">+</button>`;
             }
-            // -----------------------------------------------------
 
+            // --- CONSTRUCTION HTML ---
             html += `
             <div class="${cardClass}">
-                ${imgTag}
+                ${badgeHtml}  ${imgTag}
                 <div class="item-info">
                     <h3>${item.Nom}</h3> 
                     <p class="item-desc">${item.Description || ''}</p>
@@ -149,7 +160,7 @@ function getQtyInCart(name) {
 
 function updateQty(name, change) {
     const itemData = menuData.find(i => i.Nom === name);
-    // Double sécurité si quelqu'un essaie de tricher via la console sur un produit épuisé
+    // Sécurité stock
     if(change > 0) {
         const dispo = (itemData.Dispo || 'OUI').trim().toUpperCase();
         if(dispo === 'NON') return; 
@@ -168,9 +179,8 @@ function updateQty(name, change) {
     }
     
     updateCartUI();
-    renderMenu(); // Important de re-render pour mettre à jour les boutons + / -
+    renderMenu(); 
     
-    // Si on est en train de chercher, on garde le filtre actif (petit bonus UX)
     if(document.getElementById('search-input').value !== "") {
         filterMenu();
     }
