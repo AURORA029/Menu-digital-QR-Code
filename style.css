@@ -237,3 +237,7 @@ input, textarea {
     opacity: 0.6;
     filter: grayscale(100%); /* Rend l'image en noir et blanc */
 }
+#search-input:focus {
+    border-color: #00ccbc; /* Mets ici la couleur principale d'ORTUS/Client */
+    box-shadow: 0 0 5px rgba(0, 204, 188, 0.3);
+}
