@@ -6,8 +6,24 @@
     <title>Cuisine - Le Petit Gourmet</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Overlay pour forcer l'interaction au début (Son + Écran) */
+        #start-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(44, 62, 80, 0.95); display:flex; justify-content:center; align-items:center; z-index:9999; flex-direction: column; color: white; }
+        .btn-start-service { padding: 20px 40px; font-size: 1.5em; background: #27ae60; border:none; color:white; border-radius:10px; cursor:pointer; margin-top: 20px; transition: transform 0.2s; }
+        .btn-start-service:hover { transform: scale(1.05); }
+    </style>
 </head>
 <body>
+
+    <div id="start-overlay">
+        <i class="fas fa-utensils" style="font-size: 4em; margin-bottom: 20px;"></i>
+        <h1>Prêt pour le service ?</h1>
+        <p>Cliquez pour activer le Son et l'Anti-Veille</p>
+        <button class="btn-start-service" onclick="startService()">
+            <i class="fas fa-play"></i> DÉMARRER
+        </button>
+    </div>
+
     <header><div class="banner"><h1>👨‍🍳 Écran Cuisine</h1></div></header>
 
     <div class="kitchen-container">
@@ -16,20 +32,40 @@
                 <i class="fas fa-sync"></i> Actualiser <span id="timer" style="font-size:0.8em; opacity:0.7">(15s)</span>
             </button>
         </div>
-        <div id="orders-list">Chargement...</div>
+        <div id="orders-list">En attente de commandes...</div>
     </div>
+
+    <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <video id="nosleep-video" playsinline loop muted style="width:1px;height:1px;opacity:0;">
+        <source src="https://raw.githubusercontent.com/richtr/NoSleep.js/master/src/1sec-black.mp4" type="video/mp4">
+    </video>
 
     <script>
         // --- TES LIENS ---
         const CSV_COMMANDES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7lTNMQNNmgQrlsBbtD0lsq4emQqNVoeVUxpgG2WFLOgopD_z6u5fQ6S31krFBuTqiwFfUX6nU6O7g/pub?gid=1409508146&single=true&output=csv';
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec';
 
-        // --- ACTUALISATION AUTOMATIQUE ---
-        document.addEventListener('DOMContentLoaded', () => {
+        let knownOrderIds = new Set(); // Pour savoir si c'est une nouvelle commande (Son)
+        let soundEnabled = false;
+
+        // --- FONCTION DE DÉMARRAGE (SON + NO SLEEP) ---
+        function startService() {
+            document.getElementById('start-overlay').style.display = 'none';
+            soundEnabled = true;
+            
+            // 1. Débloquer le son (hack navigateur)
+            const audio = document.getElementById('alert-sound');
+            audio.play().then(() => audio.pause()).catch(() => {});
+
+            // 2. Empêcher la veille (hack vidéo)
+            const video = document.getElementById('nosleep-video');
+            video.play().catch(() => {});
+
+            // 3. Lancer la boucle
             loadOrders();
-            setInterval(loadOrders, 15000); // 15 secondes
+            setInterval(loadOrders, 15000);
             startTimer();
-        });
+        }
 
         function loadOrders() {
             const btnIcon = document.querySelector('.refresh-btn i');
@@ -51,23 +87,51 @@
 
         function renderOrders(orders) {
             const container = document.getElementById('orders-list');
-            container.innerHTML = '';
             
+            // On récupère ce qu'on a déjà servi dans la mémoire du téléphone
             const localFinished = JSON.parse(localStorage.getItem('finished_orders') || '[]');
 
+            // Filtre : On garde seulement ce qui n'est PAS servi ET pas dans la mémoire locale
             const activeOrders = orders.filter(o => {
                 const statut = (o.Statut || "").toLowerCase().trim();
                 const id = o.ID_Commande;
+                if (!id) return false;
                 if (statut.includes("servi")) return false;
                 if (localFinished.includes(id)) return false;
                 return true;
             });
 
-            activeOrders.reverse().forEach(order => {
-                if(!order.ID_Commande) return;
+            // --- LOGIQUE SONORE ---
+            // Si on trouve un ID dans activeOrders qu'on ne connaissait pas avant -> SON
+            let hasNew = false;
+            activeOrders.forEach(o => {
+                if (!knownOrderIds.has(o.ID_Commande)) {
+                    hasNew = true;
+                    knownOrderIds.add(o.ID_Commande);
+                }
+            });
 
+            if (hasNew && soundEnabled) {
+                const audio = document.getElementById('alert-sound');
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("Son bloqué"));
+            }
+            // ----------------------
+
+            // Rendu Visuel
+            container.innerHTML = '';
+            
+            if(activeOrders.length === 0) {
+                container.innerHTML = '<p style="text-align:center; margin-top:50px; color:#888; font-size:1.2em;"><i class="fas fa-mug-hot"></i><br>Tout est servi !</p>';
+                return;
+            }
+
+            activeOrders.reverse().forEach(order => {
                 const div = document.createElement('div');
                 div.className = 'order-card';
+                // Animation d'arrivée
+                div.style.animation = "slideIn 0.5s ease-out";
+                
                 div.innerHTML = `
                     <div class="order-header">
                         <span>${order.ID_Commande}</span>
@@ -78,6 +142,7 @@
                     </div>
                     <div class="order-meta">
                         <span>👤 ${order.Client}</span>
+                        <span>💰 ${order.Total}</span>
                     </div>
                     
                     ${order.Commentaire ? `
@@ -94,22 +159,20 @@
                 `;
                 container.appendChild(div);
             });
-            
-            if(activeOrders.length === 0) {
-                container.innerHTML = '<p style="text-align:center; margin-top:50px; color:#888; font-size:1.2em;"><i class="fas fa-mug-hot"></i><br>Tout est servi !</p>';
-            }
         }
 
         function markAsServed(id, btnElement) {
             btnElement.innerText = "Traitement...";
             btnElement.disabled = true;
 
+            // 1. Sauvegarde locale immédiate (pour que ça disparaisse tout de suite)
             let localFinished = JSON.parse(localStorage.getItem('finished_orders') || '[]');
             if(!localFinished.includes(id)) {
                 localFinished.push(id);
                 localStorage.setItem('finished_orders', JSON.stringify(localFinished));
             }
 
+            // 2. Envoi à Google Sheets (Silent update)
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -117,13 +180,15 @@
                 body: JSON.stringify({ action: 'serve', orderId: id })
             });
 
+            // 3. Animation de sortie
             const card = btnElement.closest('.order-card');
             card.style.transition = "all 0.5s ease";
             card.style.opacity = "0";
-            card.style.transform = "translateX(50px)";
+            card.style.transform = "translateX(100px)";
             
             setTimeout(() => {
                 card.remove();
+                // Vérifier si c'était le dernier
                 const container = document.getElementById('orders-list');
                 if(container.children.length === 0) {
                      container.innerHTML = '<p style="text-align:center; margin-top:50px; color:#888; font-size:1.2em;"><i class="fas fa-mug-hot"></i><br>Tout est servi !</p>';
@@ -141,26 +206,24 @@
             }, 1000);
         }
 
-        // --- NOUVEAU PARSEUR CSV INTELLIGENT ---
-        // Il ne coupe plus les phrases s'il y a une virgule entre guillemets
+        // --- PARSEUR CSV ROBUSTE ---
         function parseCSV(str) {
             const lines = str.split('\n').filter(l => l.trim() !== '');
+            if (lines.length < 2) return [];
             const headers = lines[0].split(',').map(h => h.trim());
             
             return lines.slice(1).map(line => {
-                // Cette Regex magique coupe aux virgules, SAUF celles entre guillemets
                 const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                
-                const cleanValues = values.map(val => {
-                    // On nettoie les guillemets autour et on enlève les espaces
-                    return val.trim().replace(/^"|"$/g, '').replace(/""/g, '"');
-                });
-                
+                const cleanValues = values.map(val => val.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
                 let obj = {};
                 headers.forEach((h, i) => obj[h] = cleanValues[i] || '');
                 return obj;
             });
         }
     </script>
+    
+    <style>
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </body>
 </html>
