@@ -1,11 +1,11 @@
 // ================= CONFIGURATION =================
-// 1. Tes liens (Ceux de ton projet)
+// 1. Tes liens
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7lTNMQNNmgQrlsBbtD0lsq4emQqNVoeVUxpgG2WFLOgopD_z6u5fQ6S31krFBuTqiwFfUX6nU6O7g/pub?gid=0&single=true&output=csv'; 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec'; 
 
-// 2. Tes numéros intégrés
-const WHATSAPP_PHONE = '261340494520';    // Format international sans +
-const RESTAURANT_PHONE_SMS = '0340494520'; // Numéro local pour le SMS de secours
+// 2. Tes numéros
+const WHATSAPP_PHONE = '261340494520';    
+const RESTAURANT_PHONE_SMS = '0340494520'; 
 
 let menuData = [];
 let cart = [];
@@ -36,9 +36,7 @@ function parseCSV(str) {
     const headers = lines[0].split(',').map(h => h.trim());
     
     return lines.slice(1).map(line => {
-        // Découpe en respectant les virgules DANS les guillemets
         const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        
         const cleanValues = values.map(val => {
             return val ? val.trim().replace(/^"|"$/g, '').replace(/""/g, '"') : '';
         });
@@ -49,42 +47,31 @@ function parseCSV(str) {
     });
 }
 
-// ================= MOTEUR DE RECHERCHE & AFFICHAGE =================
-
-// Fonction déclenchée quand on tape dans la barre
+// ================= MOTEUR DE RECHERCHE =================
 function filterMenu() {
     const input = document.getElementById('search-input');
     const filter = input.value.toLowerCase().trim();
 
-    // Si la barre est vide, on affiche tout le menu normal
     if (filter === "") {
         renderMenu(menuData); 
         return;
     }
 
-    // ALGORITHME DE PRIORITÉ
-    // On garde l'élément si :
-    // 1. Le TITRE contient la recherche (Priorité absolue)
-    // OU
-    // 2. La DESCRIPTION contient la recherche (Secondaire)
-    
     const filteredData = menuData.filter(item => {
         const titleMatch = item.Nom.toLowerCase().includes(filter);
         const descMatch = (item.Description || '').toLowerCase().includes(filter);
-        
         return titleMatch || descMatch;
     });
 
     renderMenu(filteredData);
 }
 
-// Nouvelle version de renderMenu qui accepte des données en paramètre
-// (data = menuData) signifie : par défaut, utilise tout le menu si on ne donne rien
+// ================= RENDU DU MENU (AVEC GESTION STOCK) =================
 function renderMenu(data = menuData) {
     const container = document.getElementById('menu-container');
     container.innerHTML = '';
     
-    // Si la recherche ne donne rien
+    // Si recherche vide
     if (data.length === 0) {
         container.innerHTML = `
             <div style="text-align:center; padding: 40px; color:#888;">
@@ -95,13 +82,10 @@ function renderMenu(data = menuData) {
         return;
     }
 
-    // On récupère les catégories présentes DANS LES RÉSULTATS
     const categories = [...new Set(data.map(i => i.Categorie))].filter(c => c);
 
     categories.forEach(cat => {
         let html = `<h2 class="category-title">${cat}</h2>`;
-        
-        // On filtre les items de cette catégorie
         const catItems = data.filter(i => i.Categorie === cat);
         
         catItems.forEach(item => {
@@ -109,8 +93,23 @@ function renderMenu(data = menuData) {
             const imgTag = item.ImageURL ? `<img src="${item.ImageURL}" class="item-img" alt="${item.Nom}" loading="lazy">` : '';
             const safeName = item.Nom.replace(/'/g, "\\'");
 
+            // --- C'EST ICI QUE TU AVAIS PERDU LA LOGIQUE STOCK ---
+            
+            // 1. Vérification disponibilité (Dispo = 'Non' dans Excel ?)
+            const dispo = (item.Dispo || 'OUI').trim().toUpperCase();
+            const isAvailable = dispo !== 'NON'; 
+
+            // 2. Classe CSS pour griser si épuisé
+            const cardClass = isAvailable ? "menu-item" : "menu-item exhausted";
+
+            // 3. Logique des boutons
             let controlsHtml = '';
-            if (qty > 0) {
+            
+            if (!isAvailable) {
+                // CAS : RUPTURE DE STOCK
+                controlsHtml = `<button class="add-btn disabled" disabled style="background:#ccc; cursor:not-allowed; border:none; color:#666;">Épuisé</button>`;
+            } else if (qty > 0) {
+                // CAS : DÉJÀ AU PANIER
                 controlsHtml = `
                 <div class="item-controls">
                     <button onclick="updateQty('${safeName}', -1)">-</button>
@@ -118,14 +117,17 @@ function renderMenu(data = menuData) {
                     <button onclick="updateQty('${safeName}', 1)">+</button>
                 </div>`;
             } else {
+                // CAS : DISPONIBLE
                 controlsHtml = `<button class="add-btn" onclick="updateQty('${safeName}', 1)">+</button>`;
             }
+            // -----------------------------------------------------
 
             html += `
-            <div class="menu-item">
+            <div class="${cardClass}">
                 ${imgTag}
                 <div class="item-info">
-                    <h3>${item.Nom}</h3> <p class="item-desc">${item.Description || ''}</p>
+                    <h3>${item.Nom}</h3> 
+                    <p class="item-desc">${item.Description || ''}</p>
                     <span class="item-price">${item.Prix} Ar</span>
                 </div>
                 <div class="action-area">
@@ -139,7 +141,7 @@ function renderMenu(data = menuData) {
 }
 
 
-// ================= FONCTIONS PANIER =================
+// ================= FONCTIONS PANIER & UTILS =================
 function getQtyInCart(name) {
     const item = cart.find(i => i.name === name);
     return item ? item.qty : 0;
@@ -147,6 +149,12 @@ function getQtyInCart(name) {
 
 function updateQty(name, change) {
     const itemData = menuData.find(i => i.Nom === name);
+    // Double sécurité si quelqu'un essaie de tricher via la console sur un produit épuisé
+    if(change > 0) {
+        const dispo = (itemData.Dispo || 'OUI').trim().toUpperCase();
+        if(dispo === 'NON') return; 
+    }
+
     const existing = cart.find(i => i.name === name);
 
     if (existing) {
@@ -160,7 +168,12 @@ function updateQty(name, change) {
     }
     
     updateCartUI();
-    renderMenu();
+    renderMenu(); // Important de re-render pour mettre à jour les boutons + / -
+    
+    // Si on est en train de chercher, on garde le filtre actif (petit bonus UX)
+    if(document.getElementById('search-input').value !== "") {
+        filterMenu();
+    }
 }
 
 function showToast(message) {
@@ -198,7 +211,6 @@ function updateCartUI() {
 
 function toggleCart() {
     const modal = document.getElementById('cart-modal');
-    // Si on ouvre le panier alors qu'il y a un message de succès, on reload la page
     if (modal.style.display === 'flex' && document.querySelector('.success-modal')) {
         location.reload(); 
     }
@@ -222,7 +234,7 @@ function getOrderData() {
     return { orderId, table, client, note, total, details, cart };
 }
 
-// ================= ENVOI HYBRIDE (INTERNET + SMS SECOURS) =================
+// ================= ENVOI HYBRIDE =================
 
 function sendOrderAppsScript() {
     const data = getOrderData();
@@ -231,36 +243,28 @@ function sendOrderAppsScript() {
     const btn = document.querySelector('.btn-order');
     const originalText = btn.innerText;
     
-    // Feedback visuel
     btn.innerText = 'Envoi en cours...';
     btn.disabled = true;
 
-    // 1. Essai Internet
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors', 
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     }).then(() => {
-        // SUCCÈS INTERNET
         showSuccessModal(data);
-        
     }).catch(err => {
-        // ÉCHEC INTERNET -> PLAN B : SMS
         console.warn("Erreur internet, passage SMS", err);
-        
         if(confirm("La connexion Internet est instable.\nEnvoyer la commande par SMS ?")) {
             sendViaSMSBackup(data);
-            showSuccessModal(data, true); // true = c'est un SMS
+            showSuccessModal(data, true); 
         } else {
-            // Annulation
             btn.innerText = originalText;
             btn.disabled = false;
         }
     });
 }
 
-// Fonction de secours SMS
 function sendViaSMSBackup(data) {
     let smsBody = `CMD ${data.orderId}\n`;
     smsBody += `Table: ${data.table} - ${data.client}\n`;
@@ -271,8 +275,6 @@ function sendViaSMSBackup(data) {
     if(data.note) smsBody += `\nNote: ${data.note}`;
 
     const encodedBody = encodeURIComponent(smsBody);
-    
-    // Détection iPhone vs Android pour le séparateur
     const ua = navigator.userAgent.toLowerCase();
     const separator = (ua.indexOf("iphone") > -1 || ua.indexOf("ipad") > -1) ? '&' : '?';
     
