@@ -233,3 +233,7 @@ input, textarea {
 }
 .refresh-bar { text-align: center; margin-bottom: 20px; }
 .refresh-btn { background: var(--dark); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+.menu-item.exhausted {
+    opacity: 0.6;
+    filter: grayscale(100%); /* Rend l'image en noir et blanc */
+}
