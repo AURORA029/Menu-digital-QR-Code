@@ -49,61 +49,83 @@ function parseCSV(str) {
     });
 }
 
-// ================= RENDU DU MENU =================
-function renderMenu() {
-    const container = document.getElementById('menu-container');
-    container.innerHTML = '';
-    
-    // Récupère les catégories uniques
-    const categories = [...new Set(menuData.map(i => i.Categorie))].filter(c => c);
-    
-    if (categories.length === 0) {
-        container.innerHTML = '<p style="text-align:center">Menu en cours de chargement...</p>';
+// ================= MOTEUR DE RECHERCHE & AFFICHAGE =================
+
+// Fonction déclenchée quand on tape dans la barre
+function filterMenu() {
+    const input = document.getElementById('search-input');
+    const filter = input.value.toLowerCase().trim();
+
+    // Si la barre est vide, on affiche tout le menu normal
+    if (filter === "") {
+        renderMenu(menuData); 
         return;
     }
 
+    // ALGORITHME DE PRIORITÉ
+    // On garde l'élément si :
+    // 1. Le TITRE contient la recherche (Priorité absolue)
+    // OU
+    // 2. La DESCRIPTION contient la recherche (Secondaire)
+    
+    const filteredData = menuData.filter(item => {
+        const titleMatch = item.Nom.toLowerCase().includes(filter);
+        const descMatch = (item.Description || '').toLowerCase().includes(filter);
+        
+        return titleMatch || descMatch;
+    });
+
+    renderMenu(filteredData);
+}
+
+// Nouvelle version de renderMenu qui accepte des données en paramètre
+// (data = menuData) signifie : par défaut, utilise tout le menu si on ne donne rien
+function renderMenu(data = menuData) {
+    const container = document.getElementById('menu-container');
+    container.innerHTML = '';
+    
+    // Si la recherche ne donne rien
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px; color:#888;">
+                <i class="fas fa-search" style="font-size: 2em; margin-bottom:10px;"></i>
+                <p>Oups ! Aucun plat ne correspond à votre recherche.</p>
+                <button onclick="document.getElementById('search-input').value=''; filterMenu()" style="margin-top:10px; padding:5px 15px; border:1px solid #ccc; background:white; border-radius:5px;">Tout afficher</button>
+            </div>`;
+        return;
+    }
+
+    // On récupère les catégories présentes DANS LES RÉSULTATS
+    const categories = [...new Set(data.map(i => i.Categorie))].filter(c => c);
+
     categories.forEach(cat => {
         let html = `<h2 class="category-title">${cat}</h2>`;
-        const catItems = menuData.filter(i => i.Categorie === cat);
+        
+        // On filtre les items de cette catégorie
+        const catItems = data.filter(i => i.Categorie === cat);
         
         catItems.forEach(item => {
             const qty = getQtyInCart(item.Nom);
             const imgTag = item.ImageURL ? `<img src="${item.ImageURL}" class="item-img" alt="${item.Nom}" loading="lazy">` : '';
-            // Sécurisation des noms avec apostrophes pour le onclick
             const safeName = item.Nom.replace(/'/g, "\\'");
 
-            // On nettoie la valeur de la colonne Dispo (enlève espaces et met en majuscule)
-const dispo = (item.Dispo || 'OUI').trim().toUpperCase();
-const isAvailable = dispo !== 'NON'; // Si c'est "NON", c'est faux.
-
-let controlsHtml = '';
-
-if (!isAvailable) {
-    // CAS 1 : RUPTURE DE STOCK
-    controlsHtml = `<button class="add-btn disabled" disabled style="background:#ccc; cursor:not-allowed;">Épuisé</button>`;
-} else if (qty > 0) {
-    // CAS 2 : DÉJÀ AU PANIER
-    controlsHtml = `
-    <div class="item-controls">
-        <button onclick="updateQty('${safeName}', -1)">-</button>
-        <span class="item-qty">${qty}</span>
-        <button onclick="updateQty('${safeName}', 1)">+</button>
-    </div>`;
-} else {
-    // CAS 3 : DISPONIBLE (Affichage normal)
-    controlsHtml = `<button class="add-btn" onclick="updateQty('${safeName}', 1)">+</button>`;
-}
-
-// Optionnel : Griser toute la carte si épuisé
-const cardClass = isAvailable ? "menu-item" : "menu-item exhausted";
-
+            let controlsHtml = '';
+            if (qty > 0) {
+                controlsHtml = `
+                <div class="item-controls">
+                    <button onclick="updateQty('${safeName}', -1)">-</button>
+                    <span class="item-qty">${qty}</span>
+                    <button onclick="updateQty('${safeName}', 1)">+</button>
+                </div>`;
+            } else {
+                controlsHtml = `<button class="add-btn" onclick="updateQty('${safeName}', 1)">+</button>`;
+            }
 
             html += `
             <div class="menu-item">
                 ${imgTag}
                 <div class="item-info">
-                    <h3>${item.Nom}</h3>
-                    <p class="item-desc">${item.Description || ''}</p>
+                    <h3>${item.Nom}</h3> <p class="item-desc">${item.Description || ''}</p>
                     <span class="item-price">${item.Prix} Ar</span>
                 </div>
                 <div class="action-area">
@@ -115,6 +137,7 @@ const cardClass = isAvailable ? "menu-item" : "menu-item exhausted";
         container.innerHTML += html;
     });
 }
+
 
 // ================= FONCTIONS PANIER =================
 function getQtyInCart(name) {
