@@ -7,12 +7,12 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* Police style iPhone/Insta */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--light);
     margin: 0;
     padding-bottom: 90px;
     color: var(--dark);
-    -webkit-font-smoothing: antialiased; /* Rendu texte plus net */
+    -webkit-font-smoothing: antialiased;
 }
 
 /* --- HEADER --- */
@@ -21,13 +21,12 @@ header .banner {
     padding: 15px 20px;
     text-align: center;
     border-bottom: 1px solid #eee;
-    /* On retire l'ombre ici pour laisser la place à la barre de nav */
 }
 
 h1 { margin: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
 h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: none; font-weight: 800; color: #333; }
 
-/* --- NOUVEAU : NAVIGATION "INSTAGRAM" (Sticky) --- */
+/* --- NAVIGATION STICKY --- */
 .category-nav {
     display: flex;
     overflow-x: auto;
@@ -35,13 +34,12 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
     background: white;
     padding: 12px 10px;
     position: sticky;
-    top: 0; /* Colle en haut */
+    top: 0;
     z-index: 90;
     border-bottom: 1px solid #eee;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     -webkit-overflow-scrolling: touch;
 }
-/* Cache la barre de scroll moche */
 .category-nav::-webkit-scrollbar { display: none; }
 
 .cat-btn {
@@ -92,14 +90,15 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
 
 .menu-item {
     background: white;
-    border-radius: 16px; /* Coins plus ronds style iOS */
+    border-radius: 16px;
     padding: 12px;
     margin-bottom: 15px;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: row; 
-    align-items: center;
-    position: relative; /* Pour le badge */
+    /* CORRECTION 1 : Alignement en haut pour gérer les textes longs proprement */
+    align-items: flex-start; 
+    position: relative;
     transition: transform 0.1s;
     border: 1px solid rgba(0,0,0,0.03);
 }
@@ -110,21 +109,21 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
 .item-img {
     width: 90px;
     height: 90px;
+    /* CORRECTION 2 : Empêche l'image de s'écraser sur petits écrans */
+    min-width: 90px; 
     object-fit: cover;
     border-radius: 12px;
     margin-right: 15px;
     order: -1;
-    background-color: #eee; /* Placeholder gris si pas d'image */
+    background-color: #eee;
 }
 
 /* Infos Texte */
 .item-info {
     flex: 1;
-    padding-right: 10px;
-    min-height: 90px; /* Assure une hauteur mini */
+    padding-right: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
 }
 
 .item-info h3 { 
@@ -132,25 +131,38 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
     font-size: 1.05rem; 
     font-weight: 700; 
     line-height: 1.3;
+    /* CORRECTION 3 : Marge à droite pour que le titre ne passe pas sous le badge PROMO */
+    padding-right: 60px; 
 }
+
+/* Description */
 .item-desc { 
     font-size: 0.85rem; 
     color: #777; 
     margin: 0 0 8px 0; 
     line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Coupe le texte trop long après 2 lignes */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    /* CORRECTION 4 : On a supprimé le line-clamp pour afficher tout le texte */
 }
-.item-price { font-weight: 700; color: var(--dark); font-size: 1rem; }
+
+.item-price { font-weight: 700; color: var(--dark); font-size: 1rem; margin-top: auto; }
+
+/* Zone d'action (Prix + Bouton à droite) - AJOUT MANQUANT DANS TON ANCIEN CODE */
+.action-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-left: 10px;
+    align-self: stretch; /* Prend toute la hauteur */
+    min-height: 90px;
+}
 
 /* Boutons Ajout */
 .add-btn {
     background: var(--primary);
     color: white;
     border: none;
-    width: 35px; height: 35px; /* Rond parfait */
+    width: 35px; height: 35px;
     border-radius: 50%;
     cursor: pointer;
     font-weight: bold;
@@ -158,6 +170,7 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
     display: flex; align-items: center; justify-content: center;
     padding: 0;
     box-shadow: 0 2px 5px rgba(0, 204, 188, 0.3);
+    margin-top: auto; /* Pousse le bouton vers le bas */
 }
 
 .item-controls {
@@ -165,6 +178,7 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
     background: white; border: 1px solid #eee;
     padding: 3px; border-radius: 25px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-top: auto;
 }
 .item-controls button {
     width: 30px; height: 30px;
@@ -196,7 +210,7 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
     width: 90%;
     max-width: 400px;
     font-weight: 600;
-    backdrop-filter: blur(10px); /* Effet verre fumé si supporté */
+    backdrop-filter: blur(10px);
 }
 
 #cart-count {
@@ -228,7 +242,7 @@ h2 { font-size: 1.1rem; margin-top: 25px; margin-bottom: 15px; border-bottom: no
     padding: 25px;
     box-sizing: border-box;
     overflow-y: auto;
-    animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Animation fluide */
+    animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 @keyframes slideUp { from {transform: translateY(100%);} to {transform: translateY(0);} }
@@ -247,6 +261,8 @@ input, textarea {
     border-radius: 12px;
     font-family: inherit;
     font-size: 1rem;
+    width: 100%; /* SÉCURITÉ : Assure que l'input prend toute la largeur */
+    box-sizing: border-box;
 }
 input:focus, textarea:focus {
     background: white;
@@ -259,6 +275,8 @@ input:focus, textarea:focus {
     border-radius: 12px;
     font-size: 1.1rem;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    width: 100%;
+    color: white; padding: 15px; border: none; font-weight: bold; cursor: pointer;
 }
 
 /* --- BADGES (ÉTIQUETTES) --- */
@@ -275,7 +293,7 @@ input:focus, textarea:focus {
     z-index: 10;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    white-space: nowrap; /* EMPÊCHE DE COUPER LE MOT EN DEUX */
+    white-space: nowrap;
 }
 
 /* Couleurs des badges */
@@ -284,14 +302,7 @@ input:focus, textarea:focus {
 .badge-hot { background-color: #ff6b6b; }
 .badge-vege { background-color: #27ae60; }
 .badge-top { background-color: #f1c40f; color: #333; }
-
-/* LE CORRECTIF POUR "FRAIS" OU "FRESH" */
-.badge-frais, .badge-fresh { 
-    background-color: var(--frais); 
-    color: white;
-}
-
-/* Par défaut (Gris foncé) */
+.badge-frais, .badge-fresh { background-color: var(--frais); color: white; }
 .badge-default { background-color: #333; }
 
 /* Rupture de stock */
@@ -314,8 +325,41 @@ input:focus, textarea:focus {
     background-color: rgba(46, 51, 51, 0.95);
     backdrop-filter: blur(5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    visibility: hidden;
+    min-width: 250px;
+    color: #fff;
+    text-align: center;
+    border-radius: 50px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+}
+#toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 100px;
 }
 
 .success-icon {
     font-size: 60px; color: var(--primary); margin-bottom: 20px;
+}
+
+/* --- CART ITEMS DANS LE MODAL --- */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+.qty-controls { display: flex; align-items: center; gap: 10px; }
+.qty-controls button {
+    background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;
 }
