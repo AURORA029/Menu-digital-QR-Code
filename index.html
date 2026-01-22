@@ -15,6 +15,20 @@
             <p>Cuisine maison & produits frais</p>
         </div>
     </header>
+    <div class="search-wrapper" style="padding: 15px; background: #f8f9fa; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 90;">
+    
+    <p style="margin: 0 0 10px 0; font-size: 0.9em; color: #666; font-weight: 500;">
+        Une petite faim précise ? 😋
+    </p>
+
+    <div style="position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+        <input type="text" id="search-input" placeholder="Ex: Burger, Vanille, Piment..." 
+               onkeyup="filterMenu()" 
+               style="width: 100%; padding: 12px 15px 12px 40px; border-radius: 25px; border: 1px solid #ddd; font-size: 16px; outline: none; transition: 0.3s;">
+    </div>
+</div>
+
 
     <main id="menu-container">
         <div class="loader">Chargement du menu...</div>
