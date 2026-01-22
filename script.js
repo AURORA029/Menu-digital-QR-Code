@@ -66,11 +66,15 @@ function filterMenu() {
     renderMenu(filteredData);
 }
 
-// ================= RENDU DU MENU (AVEC STOCK & BADGES) =================
+// ================= RENDU DU MENU (NAVIGATION + STOCK + BADGES) =================
 function renderMenu(data = menuData) {
     const container = document.getElementById('menu-container');
-    container.innerHTML = '';
+    const navContainer = document.getElementById('category-nav'); // Cible la barre de nav
     
+    container.innerHTML = '';
+    if(navContainer) navContainer.innerHTML = ''; // Vide la barre avant de recréer
+
+    // Si recherche vide
     if (data.length === 0) {
         container.innerHTML = `
             <div style="text-align:center; padding: 40px; color:#888;">
@@ -83,8 +87,29 @@ function renderMenu(data = menuData) {
 
     const categories = [...new Set(data.map(i => i.Categorie))].filter(c => c);
 
-    categories.forEach(cat => {
-        let html = `<h2 class="category-title">${cat}</h2>`;
+    // --- NOUVEAU : GÉNÉRATION DES BOUTONS DE NAVIGATION ---
+    if(navContainer && categories.length > 1) { 
+        categories.forEach((cat, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.innerText = cat;
+            // Au clic, on scroll vers le titre correspondant
+            btn.onclick = () => {
+                const element = document.getElementById(`cat-${index}`);
+                if(element) {
+                    // Scroll fluide avec un décalage pour ne pas être caché par la barre du haut
+                    const y = element.getBoundingClientRect().top + window.scrollY - 140;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                }
+            };
+            navContainer.appendChild(btn);
+        });
+    }
+    // -------------------------------------------------------
+
+    categories.forEach((cat, index) => {
+        // Ajout de l'ID unique pour le scroll (id="cat-0", "cat-1"...)
+        let html = `<h2 id="cat-${index}" class="category-title">${cat}</h2>`;
         const catItems = data.filter(i => i.Categorie === cat);
         
         catItems.forEach(item => {
@@ -109,6 +134,11 @@ function renderMenu(data = menuData) {
                     badgeClass = 'badge-hot'; 
                     displayIcon = '🌶️ '; 
                 }
+                // NOUVEAU : GESTION DU FRAIS
+                else if (tagUpper === 'FRAIS' || tagUpper === 'FRESH' || tagUpper === 'GLACE') {
+                    badgeClass = 'badge-frais';
+                    displayIcon = '❄️ ';
+                }
 
                 badgeHtml = `<span class="badge ${badgeClass}">${displayIcon}${rawTag}</span>`;
             }
@@ -120,8 +150,10 @@ function renderMenu(data = menuData) {
 
             let controlsHtml = '';
             if (!isAvailable) {
+                // CAS : RUPTURE DE STOCK
                 controlsHtml = `<button class="add-btn disabled" disabled style="background:#ccc; cursor:not-allowed; border:none; color:#666;">Épuisé</button>`;
             } else if (qty > 0) {
+                // CAS : DÉJÀ AU PANIER
                 controlsHtml = `
                 <div class="item-controls">
                     <button onclick="updateQty('${safeName}', -1)">-</button>
@@ -129,13 +161,15 @@ function renderMenu(data = menuData) {
                     <button onclick="updateQty('${safeName}', 1)">+</button>
                 </div>`;
             } else {
+                // CAS : DISPONIBLE
                 controlsHtml = `<button class="add-btn" onclick="updateQty('${safeName}', 1)">+</button>`;
             }
 
             // --- CONSTRUCTION HTML ---
             html += `
             <div class="${cardClass}">
-                ${badgeHtml}  ${imgTag}
+                ${badgeHtml}
+                ${imgTag}
                 <div class="item-info">
                     <h3>${item.Nom}</h3> 
                     <p class="item-desc">${item.Description || ''}</p>
@@ -160,7 +194,8 @@ function getQtyInCart(name) {
 
 function updateQty(name, change) {
     const itemData = menuData.find(i => i.Nom === name);
-    // Sécurité stock
+    
+    // Sécurité stock (double check)
     if(change > 0) {
         const dispo = (itemData.Dispo || 'OUI').trim().toUpperCase();
         if(dispo === 'NON') return; 
@@ -181,6 +216,7 @@ function updateQty(name, change) {
     updateCartUI();
     renderMenu(); 
     
+    // Si on est en train de chercher, on garde le filtre actif
     if(document.getElementById('search-input').value !== "") {
         filterMenu();
     }
