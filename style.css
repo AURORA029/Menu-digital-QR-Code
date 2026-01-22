@@ -241,3 +241,29 @@ input, textarea {
     border-color: #00ccbc; /* Mets ici la couleur principale d'ORTUS/Client */
     box-shadow: 0 0 5px rgba(0, 204, 188, 0.3);
 }
+/* Le conteneur de l'image doit être "relative" pour que l'étiquette se place par rapport à lui */
+.menu-item {
+    position: relative; /* Sécurité */
+}
+
+/* Le style de base du badge */
+.badge {
+    position: absolute;
+    top: 10px;
+    right: 10px; /* Coin haut droit de la carte */
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 10;
+    text-transform: uppercase;
+}
+
+/* Les couleurs selon le type */
+.badge-promo { background-color: #e74c3c; } /* Rouge */
+.badge-new { background-color: #3498db; }   /* Bleu */
+.badge-hot { background-color: #d35400; }   /* Orange foncé */
+.badge-vege { background-color: #27ae60; }  /* Vert */
+.badge-top { background-color: #f1c40f; color: #333; } /* Jaune */
