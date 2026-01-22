@@ -72,17 +72,31 @@ function renderMenu() {
             // Sécurisation des noms avec apostrophes pour le onclick
             const safeName = item.Nom.replace(/'/g, "\\'");
 
-            let controlsHtml = '';
-            if (qty > 0) {
-                controlsHtml = `
-                <div class="item-controls">
-                    <button onclick="updateQty('${safeName}', -1)">-</button>
-                    <span class="item-qty">${qty}</span>
-                    <button onclick="updateQty('${safeName}', 1)">+</button>
-                </div>`;
-            } else {
-                controlsHtml = `<button class="add-btn" onclick="updateQty('${safeName}', 1)">+</button>`;
-            }
+            // On nettoie la valeur de la colonne Dispo (enlève espaces et met en majuscule)
+const dispo = (item.Dispo || 'OUI').trim().toUpperCase();
+const isAvailable = dispo !== 'NON'; // Si c'est "NON", c'est faux.
+
+let controlsHtml = '';
+
+if (!isAvailable) {
+    // CAS 1 : RUPTURE DE STOCK
+    controlsHtml = `<button class="add-btn disabled" disabled style="background:#ccc; cursor:not-allowed;">Épuisé</button>`;
+} else if (qty > 0) {
+    // CAS 2 : DÉJÀ AU PANIER
+    controlsHtml = `
+    <div class="item-controls">
+        <button onclick="updateQty('${safeName}', -1)">-</button>
+        <span class="item-qty">${qty}</span>
+        <button onclick="updateQty('${safeName}', 1)">+</button>
+    </div>`;
+} else {
+    // CAS 3 : DISPONIBLE (Affichage normal)
+    controlsHtml = `<button class="add-btn" onclick="updateQty('${safeName}', 1)">+</button>`;
+}
+
+// Optionnel : Griser toute la carte si épuisé
+const cardClass = isAvailable ? "menu-item" : "menu-item exhausted";
+
 
             html += `
             <div class="menu-item">
