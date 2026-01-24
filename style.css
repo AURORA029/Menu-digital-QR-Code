@@ -428,41 +428,79 @@ input:focus, textarea:focus {
 
 @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 
+/* --- AMÉLIORATION VISUELLE PAIEMENT --- */
+
+/* Le conteneur des instructions */
+#payment-details {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Une ombre pour le faire ressortir */
+}
+
+/* Les blocs à copier */
 .copy-block {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 8px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef; /* Bordure plus visible */
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
     cursor: pointer;
-    text-align: left;
-    transition: background 0.2s;
     position: relative;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
 }
+
+/* Effet au clic */
 .copy-block:active {
-    background: #eef;
-    border-color: #aaf;
+    background: #e2e6ea;
+    border-color: #adb5bd;
+    transform: scale(0.98);
 }
+
+/* Le titre (Numéro, Nom...) */
 .copy-label {
     font-size: 0.75em;
-    color: #888;
+    font-weight: 800;
+    color: #6c757d;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
+
+/* Ajout des numéros pour guider l'œil (Pseudo-éléments) */
+.copy-block:nth-of-type(2) .copy-label::before { content: "ETAPE 1"; background: #333; color:fff; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+.copy-block:nth-of-type(3) .copy-label::before { content: "ETAPE 2"; background: #333; color:fff; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+.copy-block:nth-of-type(4) .copy-label::before { content: "ETAPE 3"; background: #d9534f; color:fff; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+
+/* La valeur à copier (Gros chiffre) */
 .copy-val {
     font-size: 1.1em;
-    font-weight: 600;
-    color: #333;
+    font-weight: 700;
+    color: #2c3e50;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
+/* L'icône copier */
 .copy-val i {
-    color: #ccc;
-    font-size: 0.9em;
-}
-.copy-val.big {
-    font-size: 1.3em;
-    letter-spacing: 1px;
+    background: #fff;
+    padding: 8px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: #007bff;
 }
 
+/* Mise en avant spécifique du MOTIF (Très important) */
+.copy-block:last-of-type {
+    border-color: #ffc107;
+    background: #fff9db;
+}
+.copy-block:last-of-type .copy-val {
+    color: #d35400;
+    font-size: 1.3em; /* Plus gros pour la réf */
+}
