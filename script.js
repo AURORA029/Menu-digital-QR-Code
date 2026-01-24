@@ -7,11 +7,11 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_t
 const WHATSAPP_PHONE = '261340494520';    
 const RESTAURANT_PHONE_SMS = '0340494520'; 
 
-// 3. Tes infos de PAIEMENT (Avec NOMS COMPLETS)
+// 3. Tes infos de PAIEMENT
 const PAYMENT_INFO = {
     mvola: {
         number: "034 00 000 00",
-        name: "RAKOTO Jean (Gastro Pizza)" // Le nom qui s'affiche dans l'app MVola
+        name: "RAKOTO Jean (Gastro Pizza)" 
     },
     orange: {
         number: "032 00 000 00",
@@ -25,6 +25,7 @@ const PAYMENT_INFO = {
 
 let menuData = [];
 let cart = [];
+let currentOrderId = null; // <--- LA MÉMOIRE DE L'ID EST ICI
 
 // ================= CHARGEMENT =================
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(toast);
 });
 
-// ================= PARSEUR CSV (Robuste) =================
+// ================= PARSEUR CSV =================
 function parseCSV(str) {
     const lines = str.split('\n').filter(l => l.trim() !== '');
     if (lines.length < 2) return [];
@@ -271,11 +272,15 @@ function getOrderData() {
         return null;
     }
 
-    const orderId = '#CMD-' + Math.floor(Math.random() * 10000);
+    // --- CORRECTION : SI UN ID EXISTE DÉJÀ, ON LE GARDE ---
+    if (!currentOrderId) {
+        currentOrderId = '#CMD-' + Math.floor(Math.random() * 10000);
+    }
+
     const total = document.getElementById('cart-total').innerText;
     let details = cart.map(i => `(${i.qty}) ${i.name}`).join(', ');
 
-    return { orderId, table, client, note, total, details, cart };
+    return { orderId: currentOrderId, table, client, note, total, details, cart };
 }
 
 // 1. Déclencheur : Ouvre la fenêtre de choix
@@ -290,7 +295,6 @@ function openPaymentModal() {
     paymentModal.className = 'modal';
     paymentModal.style.display = 'flex';
     
-    // On passe data.orderId en paramètre
     paymentModal.innerHTML = `
         <div class="modal-content">
             <span class="close-btn" onclick="closePayment()">&times;</span>
@@ -321,7 +325,7 @@ function openPaymentModal() {
 
 // 2. Affiche les 3 étapes de copie
 function showPaymentDetails(operator, total, orderRef) {
-    const info = PAYMENT_INFO[operator]; // On récupère les infos
+    const info = PAYMENT_INFO[operator];
     const cleanNumber = info.number.replace(/\s/g, ''); 
     const div = document.getElementById('payment-details');
     
@@ -333,7 +337,6 @@ function showPaymentDetails(operator, total, orderRef) {
     div.style.display = 'block';
     div.style.borderLeft = `5px solid ${color}`;
     
-    // Le nouveau HTML avec les 3 blocs de copie
     div.innerHTML = `
         <p style="margin:0 0 10px 0; font-weight:bold; color:${color}; text-transform:uppercase;">
             Détails pour le transfert :
@@ -369,7 +372,6 @@ function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
         showToast("Numéro copié !");
     }).catch(err => {
-        // Fallback si la copie auto ne marche pas
         prompt("Copiez ce numéro :", text);
     });
 }
@@ -378,15 +380,14 @@ function copyToClipboard(text) {
 function closePayment() {
     const m = document.getElementById('payment-modal');
     if(m) m.remove();
-    document.getElementById('cart-modal').style.display = 'flex'; // Rouvre le panier
+    document.getElementById('cart-modal').style.display = 'flex';
 }
 
-// 5. ENVOI FINAL (C'est ici que ça remplace sendOrderAppsScript)
+// 5. ENVOI FINAL
 function finalizeOrder(method) {
     const data = getOrderData();
     if(!data) return;
 
-    // Mise à jour visuelle du bouton pour faire patienter
     const confirmBtn = document.querySelector('.btn-confirmed') || document.querySelector('.pay-btn.cash');
     if(confirmBtn) {
         confirmBtn.innerText = 'Validation en cours...';
@@ -394,26 +395,19 @@ function finalizeOrder(method) {
         confirmBtn.disabled = true;
     }
 
-    // On injecte la méthode de paiement dans la note
-    // Ex: "[PAIEMENT: MVOLA] Sans oignons"
     data.note = `[PAIEMENT: ${method}] ` + (data.note || "");
 
-    // Envoi à Google
     fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors', 
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     }).then(() => {
-        // Ferme le modal de paiement
         const m = document.getElementById('payment-modal');
         if(m) m.remove();
-        
-        // Affiche succès
         showSuccessModal(data);
     }).catch(err => {
         console.warn("Erreur internet, passage SMS", err);
-        // Ferme le modal de paiement
         const m = document.getElementById('payment-modal');
         if(m) m.remove();
 
@@ -444,6 +438,9 @@ function sendViaSMSBackup(data) {
 }
 
 function showSuccessModal(data, isSMS = false) {
+    // --- CORRECTION : ON RÉINITIALISE L'ID POUR LE PROCHAIN CLIENT ---
+    currentOrderId = null; 
+    
     cart = [];
     updateCartUI();
     renderMenu(); 
@@ -452,7 +449,6 @@ function showSuccessModal(data, isSMS = false) {
         "L'application SMS s'est ouverte. Envoyez le message pour valider !" : 
         "La cuisine a reçu votre commande !";
     
-    // On s'assure qu'on écrit dans le bon modal (le panier est toujours là mais caché)
     document.getElementById('cart-modal').style.display = 'flex';
     const modalContent = document.querySelector('#cart-modal .modal-content');
     
