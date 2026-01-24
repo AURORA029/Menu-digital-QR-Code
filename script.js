@@ -278,48 +278,38 @@ function getOrderData() {
     return { orderId, table, client, note, total, details, cart };
 }
 
-// ================= NOUVEAU SYSTÈME DE PAIEMENT & ENVOI =================
-
 // 1. Déclencheur : Ouvre la fenêtre de choix
 function openPaymentModal() {
-    // On vérifie d'abord si les infos sont remplies
     const data = getOrderData();
-    if(!data) return; // Si manque nom/table, ça s'arrête ici
+    if(!data) return;
 
-    // On cache le panier
     document.getElementById('cart-modal').style.display = 'none';
     
-    // On crée le HTML du modal de paiement
     const paymentModal = document.createElement('div');
     paymentModal.id = 'payment-modal';
     paymentModal.className = 'modal';
     paymentModal.style.display = 'flex';
+    
+    // On passe data.orderId en paramètre
     paymentModal.innerHTML = `
         <div class="modal-content">
             <span class="close-btn" onclick="closePayment()">&times;</span>
             <h2>💳 Paiement</h2>
-            <p>Total à payer : <strong>${data.total}</strong></p>
-            <p style="font-size:0.9em; color:#666; margin-bottom:20px;">Choisissez votre mode de paiement :</p>
+            <p>Total : <strong>${data.total}</strong></p>
+            <p style="font-size:0.9em; color:#666; margin-bottom:15px;">Choisissez votre opérateur :</p>
             
             <div class="payment-options">
-                <div class="pay-btn mvola" onclick="showPaymentDetails('mvola', '${data.total}')">
-                    <span><i class="fas fa-mobile-alt"></i> MVola</span>
-                    <i class="fas fa-chevron-right"></i>
+                <div class="pay-btn mvola" onclick="showPaymentDetails('mvola', '${data.total}', '${data.orderId}')">
+                    <span><i class="fas fa-mobile-alt"></i> MVola</span><i class="fas fa-chevron-right"></i>
                 </div>
-                
-                <div class="pay-btn orange" onclick="showPaymentDetails('orange', '${data.total}')">
-                    <span><i class="fas fa-mobile-alt"></i> Orange Money</span>
-                    <i class="fas fa-chevron-right"></i>
+                <div class="pay-btn orange" onclick="showPaymentDetails('orange', '${data.total}', '${data.orderId}')">
+                    <span><i class="fas fa-mobile-alt"></i> Orange Money</span><i class="fas fa-chevron-right"></i>
                 </div>
-
-                <div class="pay-btn airtel" onclick="showPaymentDetails('airtel', '${data.total}')">
-                    <span><i class="fas fa-mobile-alt"></i> Airtel Money</span>
-                    <i class="fas fa-chevron-right"></i>
+                <div class="pay-btn airtel" onclick="showPaymentDetails('airtel', '${data.total}', '${data.orderId}')">
+                    <span><i class="fas fa-mobile-alt"></i> Airtel Money</span><i class="fas fa-chevron-right"></i>
                 </div>
-
                 <div class="pay-btn cash" onclick="finalizeOrder('CASH')">
-                    <span><i class="fas fa-money-bill-wave"></i> Espèces / Comptoir</span>
-                    <i class="fas fa-check"></i>
+                    <span><i class="fas fa-money-bill-wave"></i> Espèces / Comptoir</span><i class="fas fa-check"></i>
                 </div>
             </div>
 
@@ -329,10 +319,10 @@ function openPaymentModal() {
     document.body.appendChild(paymentModal);
 }
 
-// 2. Affiche les détails (Numéro + Boutons)
-function showPaymentDetails(operator, total) {
-    const number = PAYMENT_NUMBERS[operator];
-    const cleanNumber = number.replace(/\s/g, ''); 
+// 2. Affiche les 3 étapes de copie
+function showPaymentDetails(operator, total, orderRef) {
+    const info = PAYMENT_INFO[operator]; // On récupère les infos
+    const cleanNumber = info.number.replace(/\s/g, ''); 
     const div = document.getElementById('payment-details');
     
     let color = '#333';
@@ -342,27 +332,34 @@ function showPaymentDetails(operator, total) {
 
     div.style.display = 'block';
     div.style.borderLeft = `5px solid ${color}`;
+    
+    // Le nouveau HTML avec les 3 blocs de copie
     div.innerHTML = `
-        <p style="margin:0; font-size:0.9em;">Envoyez <strong>${total}</strong> au :</p>
-        <span class="big-number">${number}</span>
-        
-        <div class="action-row">
-            <button class="btn-action btn-copy" onclick="copyToClipboard('${cleanNumber}')">
-                <i class="fas fa-copy"></i> Copier
-            </button>
-            <a href="tel:${cleanNumber}" class="btn-action" style="background:${color}; text-decoration:none; display:flex; align-items:center; justify-content:center;">
-                <i class="fas fa-phone"></i> Appeler
-            </a>
+        <p style="margin:0 0 10px 0; font-weight:bold; color:${color}; text-transform:uppercase;">
+            Détails pour le transfert :
+        </p>
+
+        <div class="copy-block" onclick="copyToClipboard('${cleanNumber}')">
+            <div class="copy-label">Numéro</div>
+            <div class="copy-val big">${info.number} <i class="fas fa-copy"></i></div>
         </div>
 
-        <p style="font-size:0.8em; color:#666; margin-top:10px;">
-            1. Copiez le numéro.<br>
-            2. Envoyez l'argent via votre appli.<br>
-            3. Revenez ici et validez.
+        <div class="copy-block" onclick="copyToClipboard('${info.name}')">
+            <div class="copy-label">Nom du compte (Vérifiez !)</div>
+            <div class="copy-val">${info.name} <i class="fas fa-copy"></i></div>
+        </div>
+
+        <div class="copy-block" onclick="copyToClipboard('${orderRef}')">
+            <div class="copy-label">Motif / Raison (Important)</div>
+            <div class="copy-val" style="color:${color}">${orderRef} <i class="fas fa-copy"></i></div>
+        </div>
+
+        <p style="font-size:0.8em; color:#666; margin-top:10px; font-style:italic;">
+            "Copiez ces infos dans votre application pour payer."
         </p>
 
         <button class="btn-action btn-confirmed" onclick="finalizeOrder('${operator.toUpperCase()}')">
-            ✅ J'AI ENVOYÉ L'ARGENT
+            ✅ C'EST PAYÉ
         </button>
     `;
 }
