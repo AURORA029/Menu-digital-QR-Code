@@ -428,4 +428,41 @@ input:focus, textarea:focus {
 
 @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 
+.copy-block {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+    position: relative;
+}
+.copy-block:active {
+    background: #eef;
+    border-color: #aaf;
+}
+.copy-label {
+    font-size: 0.75em;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.copy-val {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.copy-val i {
+    color: #ccc;
+    font-size: 0.9em;
+}
+.copy-val.big {
+    font-size: 1.3em;
+    letter-spacing: 1px;
+}
 
