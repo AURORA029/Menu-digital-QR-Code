@@ -7,11 +7,22 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_t
 const WHATSAPP_PHONE = '261340494520';    
 const RESTAURANT_PHONE_SMS = '0340494520'; 
 
-// 3. Tes numéros pour le PAIEMENT (À MODIFIER ICI)
-const PAYMENT_NUMBERS = {
-    mvola: "034 00 000 00",   // <--- METS TON NUMÉRO MVOLA
-    orange: "032 00 000 00",  // <--- METS TON NUMÉRO ORANGE
-    airtel: "033 00 000 00"   // <--- METS TON NUMÉRO AIRTEL
+// 3. Tes infos de PAIEMENT (Avec NOMS COMPLETS)
+const PAYMENT_INFO = {
+    mvola: {
+        number: "034 00 000 00",
+        name: "RAKOTO Jean (Gastro Pizza)" // Le nom qui s'affiche dans l'app MVola
+    },
+    orange: {
+        number: "032 00 000 00",
+        name: "ANDRIA Malala"
+    },
+    airtel: {
+        number: "033 00 000 00",
+        name: "Société SAVEUR S.A"
+    }
+};
+AIRTEL
 };
 
 let menuData = [];
