@@ -363,3 +363,69 @@ input:focus, textarea:focus {
 .qty-controls button {
     background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;
 }
+/* --- MODAL PAIEMENT --- */
+.payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pay-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.1s;
+}
+.pay-btn:active { transform: scale(0.98); background: #f9f9f9; }
+
+/* Couleurs des opérateurs */
+.mvola { border-left: 5px solid #ffcc00; }
+.orange { border-left: 5px solid #ff7900; }
+.airtel { border-left: 5px solid #e60000; }
+.cash { border-left: 5px solid #2ecc71; }
+
+.copy-zone {
+    background: #f0f2f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    text-align: center;
+    display: none; /* Caché par défaut */
+    animation: fadeIn 0.3s;
+}
+
+.big-number {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #333;
+    display: block;
+    margin: 10px 0;
+    letter-spacing: 1px;
+}
+
+.action-row {
+    display: flex; gap: 10px; margin-top: 10px;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+.btn-copy { background: #34495e; }
+.btn-confirmed { background: var(--primary); margin-top: 15px; width: 100%; padding: 15px; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+
+
