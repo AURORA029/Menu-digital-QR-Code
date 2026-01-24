@@ -22,8 +22,6 @@ const PAYMENT_INFO = {
         name: "Société SAVEUR S.A"
     }
 };
-AIRTEL
-};
 
 let menuData = [];
 let cart = [];
