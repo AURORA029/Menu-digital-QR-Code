@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion du Menu - Gourmet.mg</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f0f2f5; max-width: 800px; margin: 0 auto; color: #333; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.2em; }
+        
+        label { font-weight: 600; font-size: 0.9em; margin-bottom: 5px; display: block; color: #555; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        textarea { resize: vertical; height: 80px; }
+        
+        .btn { width: 100%; padding: 14px; border: none; background: #2c3e50; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 1em; transition: background 0.2s; }
+        .btn:hover { background: #34495e; }
+        
+        .item-list { list-style: none; padding: 0; }
+        .item { background: white; border: 1px solid #eee; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-radius: 8px; }
+        .item img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-right: 15px; background: #eee; }
+        .item-info { flex-grow: 1; }
+        .item-info strong { display: block; font-size: 1.1em; }
+        .item-info span { color: #27ae60; font-weight: bold; }
+        .btn-delete { background: #ffebee; color: #c0392b; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .btn-delete:hover { background: #ffcdd2; }
+
+        /* Loader */
+        #loading { text-align: center; color: #666; font-style: italic; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>👨‍🍳 Chef de Cuisine</h1>
+        <p>Ajouter ou supprimer des plats du menu</p>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-plus-circle"></i> Nouveau Plat</h2>
+        
+        <label>Catégorie</label>
+        <select id="cat">
+            <option value="Entrées">Entrées</option>
+            <option value="Plats">Plats</option>
+            <option value="Desserts">Desserts</option>
+            <option value="Boissons">Boissons</option>
+            <option value="Accompagnements">Accompagnements</option>
+        </select>
+
+        <label>Nom du plat</label>
+        <input type="text" id="nom" placeholder="Ex: Burger Maison">
+
+        <label>Description</label>
+        <textarea id="desc" placeholder="Ex: Steak 150g, cheddar, sauce secrète..."></textarea>
+
+        <label>Prix (Ar)</label>
+        <input type="number" id="prix" placeholder="Ex: 15000">
+
+        <label>Image (URL)</label>
+        <input type="text" id="img" placeholder="Lien http://... (Laisser vide si pas d'image)">
+
+        <label>Tag (Optionnel)</label>
+        <input type="text" id="tag" placeholder="Ex: NEW, PROMO, HOT...">
+
+        <button class="btn" onclick="addItem()">Ajouter au Menu</button>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-list-ul"></i> Carte Actuelle</h2>
+        <div id="loading"><i class="fas fa-spinner fa-spin"></i> Chargement du menu depuis Google Sheets...</div>
+        <ul id="menu-list" class="item-list"></ul>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // VERIFIE QUE C'EST BIEN TON LIEN ICI 👇
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyt2vbix3M94n_thVPXzmYdFirabX0HO7BKNvkE6LDUm6CQVGQKzLuZQ6bgkQS28sc6eQ/exec'; 
+
+        // 1. Charger le menu
+        function loadMenu() {
+            document.getElementById('loading').style.display = 'block';
+            fetch(API_URL + "?type=menu")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                const list = document.getElementById('menu-list');
+                list.innerHTML = '';
+                
+                // On trie pour afficher les derniers ajoutés en haut (optionnel)
+                data.reverse().forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'item';
+                    
+                    // Gestion image par défaut si vide
+                    const imgUrl = item.image ? item.image : 'https://placehold.co/60x60?text=Menu';
+
+                    li.innerHTML = `
+                        <img src="${imgUrl}" alt="plat">
+                        <div class="item-info">
+                            <strong>${item.nom}</strong>
+                            <small style="color:#666;">${item.categorie}</small><br>
+                            <span>${item.prix} Ar</span>
+                            ${item.tag ? `<span style="background:#2c3e50; color:white; padding:2px 5px; font-size:0.7em; border-radius:3px; margin-left:5px;">${item.tag}</span>` : ''}
+                        </div>
+                        <button class="btn-delete" onclick="deleteItem('${item.nom}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    list.appendChild(li);
+                });
+            })
+            .catch(err => {
+                document.getElementById('loading').innerHTML = "Erreur de chargement. Vérifiez le lien du script.";
+            });
+        }
+
+        // 2. Ajouter un plat
+        function addItem() {
+            const btn = document.querySelector('.btn');
+            
+            // Récupération des valeurs
+            const data = {
+                action: "add_item",
+                categorie: document.getElementById('cat').value,
+                nom: document.getElementById('nom').value,
+                desc: document.getElementById('desc').value,
+                prix: document.getElementById('prix').value,
+                image: document.getElementById('img').value,
+                tag: document.getElementById('tag').value
+            };
+
+            // Validation simple
+            if(!data.nom || !data.prix) return alert("Le Nom et le Prix sont obligatoires !");
+
+            btn.innerText = "Envoi en cours...";
+            btn.disabled = true;
+            
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(() => {
+                alert("✅ Plat ajouté avec succès !");
+                btn.innerText = "Ajouter au Menu";
+                btn.disabled = false;
+                
+                // Vider les champs
+                document.getElementById('nom').value = "";
+                document.getElementById('desc').value = "";
+                document.getElementById('prix').value = "";
+                document.getElementById('img').value = "";
+                document.getElementById('tag').value = "";
+                
+                loadMenu(); // Rafraîchir la liste
+            }).catch(err => {
+                alert("Erreur réseau");
+                btn.disabled = false;
+            });
+        }
+
+        // 3. Supprimer un plat
+        function deleteItem(nom) {
+            if(!confirm("Êtes-vous sûr de vouloir supprimer : " + nom + " ?")) return;
+            
+            // Petit effet visuel
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').innerText = "Suppression en cours...";
+
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: "delete_item", nom: nom })
+            }).then(() => {
+                // On attend 1.5s que Google Sheets se mette à jour
+                setTimeout(loadMenu, 1500);
+            });
+        }
+
+        // Lancer au démarrage
+        loadMenu();
+    </script>
+
+</body>
+</html>
