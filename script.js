@@ -322,8 +322,6 @@ function openPaymentModal() {
     `;
     document.body.appendChild(paymentModal);
 }
-paymentModal);
-}
 
 // 2. Affiche les 3 étapes de copie
 function showPaymentDetails(operator, total, orderRef) {
