@@ -313,7 +313,7 @@ function openPaymentModal() {
                     <span><i class="fas fa-mobile-alt"></i> Airtel Money</span><i class="fas fa-chevron-right"></i>
                 </div>
                 <div class="pay-btn cash" onclick="finalizeOrder('CASH')">
-                    <span><i class="fas fa-money-bill-wave"></i> Espèces / Comptoir</span><i class="fas fa-check"></i>
+                    <span><i class="fas fa-money-bill-wave"></i> Espèces / Comptoir</span>
                 </div>
             </div>
 
@@ -321,6 +321,8 @@ function openPaymentModal() {
         </div>
     `;
     document.body.appendChild(paymentModal);
+}
+paymentModal);
 }
 
 // 2. Affiche les 3 étapes de copie
