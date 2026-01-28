@@ -8,54 +8,81 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Styles spécifiques pour le Dashboard */
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
-        .demo-container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; margin: 0; }
+        .demo-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         
         /* BANNIÈRE PRO */
         header .banner {
-            background: #2c3e50;
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
             color: white;
-            padding: 25px;
+            padding: 30px;
             text-align: center;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 0 0 15px 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        header h1 { margin: 0; font-size: 1.6em; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        header p { margin: 5px 0 0; opacity: 0.8; font-size: 0.9em; font-weight: 300; }
+        header h1 { margin: 0; font-size: 1.8em; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        header p { margin: 10px 0 0; opacity: 0.9; font-size: 1em; font-weight: 300; }
 
         /* GRILLE DES LIENS */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
 
         .card {
             background: white;
             padding: 30px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             text-align: center;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             text-decoration: none;
             color: #2c3e50;
-            border: 1px solid #e1e4e8;
-            display: block;
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
-        .card:hover { transform: translateY(-3px); border-color: #00ccbc; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .card i { font-size: 2.2em; margin-bottom: 15px; color: #00ccbc; }
-        .card h2 { font-size: 1.1em; margin-bottom: 8px; margin-top: 0; font-weight: 600; }
-        .card p { font-size: 0.85em; color: #666; margin: 0; }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: #ddd;
+        }
+
+        /* Couleurs spécifiques par carte */
+        .card-client::before { background: #3498db; }
+        .card-admin::before { background: #e74c3c; } /* Rouge/Orange pour le patron */
+        .card-data::before { background: #27ae60; }
+
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .card i { font-size: 2.5em; margin-bottom: 15px; }
+        
+        .card-client i { color: #3498db; }
+        .card-admin i { color: #e74c3c; }
+        .card-data i { color: #27ae60; }
+
+        .card h2 { font-size: 1.2em; margin-bottom: 8px; margin-top: 0; font-weight: 700; }
+        .card p { font-size: 0.9em; color: #666; margin: 0; }
+        .card .badge { 
+            background: #eee; padding: 4px 10px; border-radius: 20px; 
+            font-size: 0.7em; text-transform: uppercase; margin-top: 10px; font-weight: bold; letter-spacing: 1px;
+        }
 
         /* SECTION TIMER */
         .timer-section {
             background: white;
             padding: 25px;
-            border-radius: 8px;
+            border-radius: 12px;
             text-align: center;
-            border-top: 4px solid #f39c12;
+            border-left: 5px solid #f39c12;
             margin-top: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
@@ -63,146 +90,107 @@
         .timer-header h3 { margin: 0; font-size: 1.2em; }
         
         .timer-display {
-            font-size: 3.5em;
+            font-size: 3em;
             font-weight: 700;
             color: #2c3e50;
-            margin: 20px 0;
-            font-family: 'Courier New', Courier, monospace;
-            letter-spacing: -2px;
+            margin: 15px 0;
+            font-family: monospace;
         }
         .btn-start {
-            background: #2c3e50;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
+            background: #2c3e50; color: white; border: none; padding: 10px 25px;
+            border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: 600;
             transition: background 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
         }
         .btn-start:hover { background: #34495e; }
         
-        .step-list { text-align: left; margin-top: 30px; background: #f8f9fa; padding: 20px; border-radius: 6px; font-size: 0.9em; border: 1px solid #e9ecef; }
-        .step-list strong { color: #2c3e50; display: block; margin-bottom: 10px; }
-        .step-list ol { padding-left: 20px; margin: 0; }
+        .step-list { text-align: left; margin-top: 25px; background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #eee; }
         .step-list li { margin-bottom: 8px; color: #555; }
 
-        /* SECTION ASTUCES SCAN */
-        .tips-section {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            border-top: 4px solid #3498db;
-            margin-top: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .tips-header { display: flex; align-items: center; gap: 10px; color: #3498db; margin-bottom: 15px; }
-        .tips-header h3 { margin: 0; font-size: 1.1em; }
-
-        .tips-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-        .tip-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            font-size: 0.85em;
-            border: 1px solid #e9ecef;
-            text-align: center;
-        }
-        .tip-card i { font-size: 1.5em; margin-bottom: 10px; display: block; }
-        .tip-card strong { display: block; margin-bottom: 5px; color: #333; }
+        /* SECTION ASTUCES */
+        .tips-section { margin-top: 30px; }
+        .tips-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .tip-card { background: white; padding: 15px; border-radius: 8px; text-align: center; font-size: 0.85em; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
         @media (max-width: 600px) { 
             .tips-grid { grid-template-columns: 1fr; } 
             header h1 { font-size: 1.4em; }
         }
-
     </style>
 </head>
 <body>
 
     <header>
         <div class="banner">
-            <h1><i class="fas fa-network-wired"></i> Centre de Pilotage</h1>
-            <p>Console d'administration et de démonstration - ORTUS Sarlu</p>
+            <h1><i class="fas fa-rocket"></i> Centre de Pilotage</h1>
+            <p>Administration Système - Restaurant Demo</p>
         </div>
     </header>
 
     <div class="demo-container">
 
         <div class="dashboard-grid">
-            <a href="index.html" target="_blank" class="card">
+            
+            <a href="index.html" target="_blank" class="card card-client">
                 <i class="fas fa-qrcode"></i>
                 <h2>1. Interface Client</h2>
-                <p>Scan & Commande</p>
+                <p>Le Menu Digital</p>
+                <span class="badge">Tablette / Smartphone</span>
             </a>
 
-            <a href="https://docs.google.com/spreadsheets/d/1QJMKVccvd_0CDyV32xRGGoNUJTLmkq-fFhk9GXcxIKo/edit?usp=drivesdk" target="_blank" class="card">
-                <i class="fas fa-database"></i>
-                <h2>2. Base de Données</h2>
-                <p>Logs & Comptabilité</p>
+            <a href="admin.html" target="_blank" class="card card-admin">
+                <i class="fas fa-laptop-medical"></i>
+                <h2>2. Espace Manager</h2>
+                <p>Cuisine & Caisse</p>
+                <span class="badge" style="background:#ffebee; color:#c0392b;">Accès Sécurisé</span>
             </a>
 
-            <a href="cuisine.html" target="_blank" class="card">
-                <i class="fas fa-concierge-bell"></i>
-                <h2>3. Écran Cuisine</h2>
-                <p>Gestion des bons</p>
+            <a href="https://docs.google.com/spreadsheets/d/1QJMKVccvd_0CDyV32xRGGoNUJTLmkq-fFhk9GXcxIKo/edit?usp=drivesdk" target="_blank" class="card card-data">
+                <i class="fas fa-file-excel"></i>
+                <h2>3. Back Office</h2>
+                <p>Base de Données (Google)</p>
+                <span class="badge">Archives & Bilan</span>
             </a>
         </div>
 
         <div class="timer-section">
             <div class="timer-header">
-                <i class="fas fa-stopwatch fa-lg"></i>
-                <h3>Assistant de Synchronisation</h3>
+                <i class="fas fa-stopwatch"></i>
+                <h3>Scénario de Démonstration</h3>
             </div>
-            <p style="font-size: 0.9em; color: #666;">Délai technique de mise à jour Google Sheets</p>
+            <p style="font-size: 0.9em; color: #666;">Pour montrer la vitesse du système à un client.</p>
             
-            <div class="timer-display" id="chrono">03:00</div>
+            <div class="timer-display" id="chrono">00:00</div>
             
             <button class="btn-start" onclick="startDemoTimer()">
-                <i class="fas fa-play"></i> Lancer la séquence
+                <i class="fas fa-play"></i> Lancer le Test
             </button>
 
             <div class="step-list">
-                <strong><i class="fas fa-info-circle"></i> Procédure pendant l'attente :</strong>
+                <strong><i class="fas fa-clipboard-list"></i> Déroulé suggéré :</strong>
                 <ol>
-                    <li>Ouvrir la <strong>Base de Données</strong> (Bouton 2) pour prouver l'enregistrement instantané.</li>
-                    <li>Expliquer la sécurisation des données et l'export comptable.</li>
-                    <li>Mentionner le rafraîchissement automatique de l'écran cuisine (économie de data).</li>
-                    <li>À la fin du décompte : Ouvrir l'<strong>Écran Cuisine</strong> (Bouton 3).</li>
+                    <li>Ouvrez <strong>l'Espace Manager</strong> (Bouton 2) sur un ordinateur ou une tablette.</li>
+                    <li>Prenez votre téléphone et scannez le QR Code (Bouton 1).</li>
+                    <li>Passez une commande test.</li>
+                    <li>Montrez comment la commande apparaît <strong>instantanément</strong> sur l'Espace Manager.</li>
+                    <li>Encaissez et Servez la commande pour montrer la fluidité.</li>
                 </ol>
             </div>
         </div>
 
         <div class="tips-section">
-            <div class="tips-header">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Support Appareils Anciens</h3>
-            </div>
-            <p style="margin-bottom: 15px; font-size: 0.9em; color:#555;">Si l'appareil photo natif ne détecte pas le QR Code :</p>
-            
+            <h3 style="color:#666; font-size:1em; margin-bottom:15px;"><i class="fas fa-lightbulb"></i> Astuces QR Code (Clients sans iPhone)</h3>
             <div class="tips-grid">
                 <div class="tip-card">
-                    <i class="fab fa-whatsapp" style="color:#25D366;"></i>
-                    <strong>WhatsApp</strong>
-                    Onglet "Caméra"
+                    <i class="fab fa-whatsapp" style="color:#25D366; font-size:1.5em; margin-bottom:10px;"></i><br>
+                    <strong>WhatsApp</strong><br>Onglet Caméra
                 </div>
                 <div class="tip-card">
-                    <i class="fab fa-viber" style="color:#665CAC;"></i>
-                    <strong>Viber</strong>
-                    Option "Scanner QR"
+                    <i class="fab fa-viber" style="color:#665CAC; font-size:1.5em; margin-bottom:10px;"></i><br>
+                    <strong>Viber</strong><br>Scanner QR
                 </div>
                 <div class="tip-card">
-                    <i class="fab fa-google" style="color:#DB4437;"></i>
-                    <strong>Google Lens</strong>
-                    Barre de recherche
+                    <i class="fab fa-google" style="color:#DB4437; font-size:1.5em; margin-bottom:10px;"></i><br>
+                    <strong>Google Lens</strong><br>Sur Android
                 </div>
             </div>
         </div>
@@ -210,54 +198,28 @@
     </div>
 
     <script>
-        let timeLeft = 180; // 3 minutes
+        // Un simple chronomètre pour le fun de la démo
+        let timeLeft = 0;
         let timerId = null;
 
         function startDemoTimer() {
-            if(timerId) clearInterval(timerId);
-            timeLeft = 180;
-            updateDisplay();
-
-            const btn = document.querySelector('.btn-start');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Démo en cours...';
-            btn.disabled = true;
-            btn.style.opacity = "0.7";
-
+            if(timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                document.querySelector('.btn-start').innerHTML = '<i class="fas fa-play"></i> Relancer';
+                return;
+            }
+            
+            timeLeft = 0;
+            document.querySelector('.btn-start').innerHTML = '<i class="fas fa-stop"></i> Arrêter';
+            
             timerId = setInterval(() => {
-                timeLeft--;
-                updateDisplay();
-
-                if(timeLeft <= 0) {
-                    clearInterval(timerId);
-                    const chrono = document.getElementById('chrono');
-                    chrono.innerHTML = '<span style="font-size:0.6em">SYNCHRONISÉ <i class="fas fa-check-circle"></i></span>';
-                    chrono.style.color = "#27ae60";
-                    
-                    // Alerte sonore simple
-                    try {
-                        const context = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = context.createOscillator();
-                        oscillator.type = 'sine';
-                        oscillator.frequency.value = 800;
-                        oscillator.connect(context.destination);
-                        oscillator.start();
-                        setTimeout(() => oscillator.stop(), 200);
-                    } catch(e) {}
-
-                    alert("Délai écoulé.\nLes données sont synchronisées sur l'écran cuisine.");
-                    
-                    btn.innerHTML = '<i class="fas fa-redo"></i> Relancer';
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                }
+                timeLeft++;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('chrono').innerText = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }, 1000);
-        }
-
-        function updateDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('chrono').innerText = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
     </script>
 </body>
