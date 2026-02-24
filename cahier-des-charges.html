@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cahier des Charges - Système POS & Menu Digital</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #e74c3c;
+            --bg: #f8f9fa;
+            --text: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 { color: var(--primary); }
+        h1 { border-bottom: 3px solid var(--accent); padding-bottom: 10px; text-transform: uppercase; font-size: 2em;}
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; }
+        .alert { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: var(--primary); color: white; }
+        .print-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; float: right; }
+        .print-btn:hover { background: #c0392b; }
+        
+        /* Styles spécifiques pour l'impression */
+        @media print {
+            body { background-color: white; padding: 0; }
+            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .print-btn { display: none; }
+            h1, h2, h3, th { color: black; }
+            th { background-color: #f2f2f2; color: black; }
+            .page-break { page-break-before: always; }
+            section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="print-btn" onclick="window.print()">🖨️ Imprimer / PDF</button>
+    
+    <h1>Cahier des Charges Technique et Fonctionnel</h1>
+    <p><strong>Projet :</strong> Système de Gestion de Restaurant "Local-First" & Menu QR Code<br>
+    <strong>Cible :</strong> Madagascar (Optimisé pour connexions instables et coupures de courant)<br>
+    <strong>Date :</strong> Février 2026</p>
+
+    <section>
+        <h2>1. Contexte et Objectifs</h2>
+        <p>Le projet vise à fournir une solution complète de gestion pour les restaurants à Madagascar. Le défi majeur réside dans l'instabilité de l'infrastructure locale (connexions internet lentes, coupures d'électricité JIRAMA). Une solution 100% Cloud classique est inadaptée.</p>
+        <div class="alert">
+            <strong>Stratégie Architecturale :</strong> Le système adoptera une architecture hybride. La gestion interne (Caisse, Cuisine, Admin) tournera en local (Local-First), tandis que le menu client sera une PWA légère hébergée sur le Cloud.
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Périmètre Fonctionnel (Modules)</h2>
+        <ul>
+            <li><strong>Menu Digital Client (PWA Cloud) :</strong> Accessible via scan QR Code. Utilise la connexion 4G du client. Intègre le cache hors-ligne. Permet de voir le menu, le panier, le total, et propose un Call-to-Action (Deep link/USSD) pour payer via MVola, Airtel Money ou Orange Money.</li>
+            <li><strong>Interface Caisse (POS Local) :</strong> Réception des commandes en temps réel. Validation des paiements Mobile Money (vérification manuelle des SMS reçus). Gestion des encaissements.</li>
+            <li><strong>Écran Cuisine (KDS Local) :</strong> Affichage sur tablette Android des bons de commande. Statuts : À préparer, En cours, Prêt. (Remplace l'imprimante thermique).</li>
+            <li><strong>Back-Office Admin (Local/Sync) :</strong> Gestion du catalogue, upload d'images (compression auto WebP), fixation des prix, balises spéciales (ex: "Épicé", "Nouveau"), statistiques de vente.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>3. Stack Technologique (La Stack du Projet)</h2>
+        <table>
+            <tr>
+                <th>Composant</th>
+                <th>Technologie Choise</th>
+                <th>Justification</th>
+            </tr>
+            <tr>
+                <td><strong>Frontend (Interfaces)</strong></td>
+                <td>Next.js / React, TailwindCSS</td>
+                <td>Création de PWA performantes, design responsive, composant réutilisables.</td>
+            </tr>
+            <tr>
+                <td><strong>Backend (Serveur Local)</strong></td>
+                <td>Node.js avec Express</td>
+                <td>Léger, rapide, s'installe facilement sur un mini-PC ou Raspberry Pi en restaurant.</td>
+            </tr>
+            <tr>
+                <td><strong>Base de données</strong></td>
+                <td>SQLite ou PostgreSQL local</td>
+                <td>Robustesse, pas besoin d'internet. Mécanismes de sécurité contre les coupures (WAL).</td>
+            </tr>
+            <tr>
+                <td><strong>Temps Réel</strong></td>
+                <td>Socket.io</td>
+                <td>Synchronisation instantanée entre la caisse, la cuisine et le serveur local sans recharger la page.</td>
+            </tr>
+            <tr>
+                <td><strong>Hébergement Cloud (PWA)</strong></td>
+                <td>Vercel / DigitalOcean</td>
+                <td>Déploiement via le GitHub Education Pack, haute disponibilité pour les clients.</td>
+            </tr>
+        </table>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section>
+        <h2>4. Planning et Durée de Réalisation (Roadmap)</h2>
+        <p>Estimation basée sur un développement agile avec des itérations rapides (Sprints).</p>
+        <table>
+            <tr>
+                <th>Phase</th>
+                <th>Description</th>
+                <th>Durée estimée</th>
+            </tr>
+            <tr>
+                <td><strong>Phase 1 : MVP & Socle Technique</strong></td>
+                <td>Modélisation Base de données, Setup Node.js/React, création du Menu PWA basique (Cloud) et de l'interface Caisse basique (Local).</td>
+                <td>2 à 3 semaines</td>
+            </tr>
+            <tr>
+                <td><strong>Phase 2 : Opérations & Cuisine</strong></td>
+                <td>Interface Admin (ajout plats/images) et Interface KDS (Tablette Cuisine avec WebSockets).</td>
+                <td>1 à 2 semaines</td>
+            </tr>
+            <tr>
+                <td><strong>Phase 3 : Déploiement & Sécurisation</strong></td>
+                <td>Synchronisation Cloud/Local, tests de coupure réseau simulée, configuration réseau sur site.</td>
+                <td>1 semaine</td>
+            </tr>
+            <tr>
+                <td><strong>Total Estimé</strong></td>
+                <td><strong>Livraison de la V1 opérationnelle</strong></td>
+                <td><strong>4 à 6 semaines</strong></td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>5. Prérequis Matériels (Côté Restaurant)</h2>
+        <ul>
+            <li>1 Mini-PC ou Ordinateur portable basique (Fera office de Serveur local + Écran de Caisse).</li>
+            <li>1 Routeur Wi-Fi performant (Réseau Local intranet).</li>
+            <li>1 Onduleur (UPS) pour protéger l'ordinateur et le routeur des coupures JIRAMA.</li>
+            <li>1 Tablette Android d'entrée de gamme (Pour l'écran de la cuisine).</li>
+        </ul>
+    </section>
+</div>
+
+</body>
+</html>
