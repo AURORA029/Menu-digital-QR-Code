@@ -3,164 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manuel d'Installation - Mada POS</title>
+    <title>Guide Pro - Mada POS</title>
     <style>
-        :root {
-            --primary: #0f172a;
-            --secondary: #3b82f6;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-color: #f8fafc;
-            --text-main: #334155;
-            --border: #e2e8f0;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-main);
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 10px;
-            margin-top: 0;
-        }
-        h2 {
-            color: var(--secondary);
-            margin-top: 30px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 5px;
-        }
-        .step {
-            margin-bottom: 25px;
-        }
-        .step-number {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            width: 28px;
-            height: 28px;
-            text-align: center;
-            border-radius: 50%;
-            line-height: 28px;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        .step-title {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: var(--primary);
-        }
-        .alert {
-            padding: 15px;
-            border-left: 5px solid;
-            background-color: #fef2f2;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .alert-danger {
-            border-color: var(--danger);
-            color: #991b1b;
-        }
-        .alert-warning {
-            border-color: var(--warning);
-            background-color: #fffbeb;
-            color: #92400e;
-        }
-        code {
-            background-color: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            color: #e11d48;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #64748b;
-        }
+        body { font-family: 'Inter', sans-serif; color: #1e293b; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 40px 20px; background: #f1f5f9; }
+        .card { background: white; padding: 40px; border-radius: 20px; shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .badge { background: #0f172a; color: white; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: bold; }
+        h1 { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 10px; }
+        .step { margin-bottom: 30px; padding-left: 20px; border-left: 4px solid #3b82f6; }
+        .step h2 { font-size: 18px; margin-bottom: 5px; color: #3b82f6; }
+        code { background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-weight: bold; color: #ef4444; }
+        .footer { text-align: center; margin-top: 40px; color: #64748b; font-size: 14px; }
     </style>
 </head>
 <body>
+    <div class="card">
+        <span class="badge">V1.1 STABLE</span>
+        <h1>Guide de Mise en Service - Mada POS</h1>
+        <p>Suivez ces étapes pour transformer votre PC en serveur de restaurant.</p>
 
-<div class="container">
-    <h1>Guide de Déploiement : Mada POS</h1>
-    <p>Ce document détaille la procédure stricte pour installer le système de caisse Mada POS sur l'ordinateur central du restaurant et y connecter les terminaux mobiles (iPads/Smartphones).</p>
+        <div class="step">
+            <h2>1. Préparation du Serveur</h2>
+            <p>Lancez le fichier <code>Mada POS.exe</code>. Lors de l'alerte Windows, cliquez sur <b>"Informations complémentaires"</b> puis <b>"Exécuter quand même"</b>.</p>
+        </div>
 
-    <h2>Phase 1 : Prérequis Matériels</h2>
-    <ul>
-        <li>Un ordinateur principal sous <strong>Windows 10 ou 11</strong> (qui fera office de Serveur et de Caisse principale).</li>
-        <li>Un routeur Wi-Fi (Box internet).</li>
-        <li>Des terminaux mobiles (iPad, tablettes Android, ou Smartphones).</li>
-        <li><strong>Règle absolue :</strong> L'ordinateur Windows ET les terminaux mobiles doivent impérativement être connectés au <strong>même réseau Wi-Fi</strong>.</li>
-    </ul>
+        <div class="step">
+            <h2>2. Configuration du Réseau</h2>
+            <p>Vérifiez que le PC est sur le Wi-Fi du restaurant. Dans l'administration (5 clics sur le titre), entrez l'adresse IP du PC (ex: <code>192.168.1.132</code>).</p>
+        </div>
 
-    <h2>Phase 2 : Installation sur le PC Windows (Le Serveur)</h2>
-    <div class="step">
-        <span class="step-number">1</span><span class="step-title">Récupération du fichier</span>
-        <p>Téléchargez le fichier d'installation (artefact) depuis l'interface GitHub Actions. Vous obtiendrez un fichier <code>.zip</code>.</p>
-    </div>
-    <div class="step">
-        <span class="step-number">2</span><span class="step-title">Extraction</span>
-        <p>Faites un clic droit sur le fichier <code>.zip</code> téléchargé et sélectionnez <strong>"Extraire tout..."</strong>. Placez le dossier extrait sur le Bureau de l'ordinateur.</p>
-    </div>
-    <div class="step">
-        <span class="step-number">3</span><span class="step-title">Installation</span>
-        <p>Ouvrez le dossier extrait et double-cliquez sur l'exécutable <code>Mada POS.exe</code>.</p>
-        <div class="alert alert-warning">
-            <strong>Note de sécurité Windows :</strong> Un écran bleu "Windows a protégé votre ordinateur" peut apparaître (SmartScreen). Cliquez sur <strong>"Informations complémentaires"</strong> puis sur le bouton <strong>"Exécuter quand même"</strong>.
+        <div class="step">
+            <h2>3. Accès Client & Personnel</h2>
+            <p>Scannez le QR Code généré dans le Dashboard ou tapez l'adresse IP suivie de <code>:5000</code> dans Safari/Chrome sur vos tablettes.</p>
+        </div>
+
+        <div class="step">
+            <h2>4. Gestion des Données</h2>
+            <p>Les photos et la base de données sont sauvegardées automatiquement dans votre dossier <code>%AppData%/Roaming/Mada POS</code>.</p>
         </div>
     </div>
-
-    <h2>Phase 3 : Premier lancement & Configuration Réseau (Critique)</h2>
-    <div class="step">
-        <span class="step-number">4</span><span class="step-title">Démarrage</span>
-        <p>Lancez le logiciel depuis le raccourci créé sur votre bureau. L'interface de caisse va s'afficher à l'écran.</p>
-    </div>
-    <div class="step">
-        <span class="step-number">5</span><span class="step-title">Autorisation du Pare-feu Windows</span>
-        <div class="alert alert-danger">
-            <strong>ÉTAPE CRUCIALE :</strong> Au premier lancement, une fenêtre du Pare-feu Windows Defender va s'ouvrir vous demandant d'autoriser l'application (ou Node.js) à communiquer sur le réseau. Vous devez <strong>OBLIGATOIREMENT cocher la case "Réseaux privés"</strong> et cliquer sur "Autoriser l'accès". Si vous ignorez cette étape, les iPads ne pourront pas se connecter.
-        </div>
-    </div>
-
-    <h2>Phase 4 : Connexion des iPads (Les Terminaux)</h2>
-    <div class="step">
-        <span class="step-number">6</span><span class="step-title">Trouver l'adresse IP du Serveur</span>
-        <p>Sur l'ordinateur Windows : cliquez sur l'icône Wi-Fi (en bas à droite), allez dans les propriétés de votre connexion réseau et cherchez l'<strong>Adresse IPv4</strong> (elle ressemble généralement à <code>192.168.1.X</code> ou <code>192.168.0.X</code>).</p>
-    </div>
-    <div class="step">
-        <span class="step-number">7</span><span class="step-title">Connexion depuis l'iPad</span>
-        <p>Sur l'iPad (assuré d'être sur le même Wi-Fi), ouvrez Safari. Dans la barre d'adresse, tapez l'adresse IP trouvée à l'étape précédente suivie du port <code>:5000</code>. Exemple : <code>http://192.168.1.15:5000</code></p>
-    </div>
-    <div class="step">
-        <span class="step-number">8</span><span class="step-title">Création de l'application sur l'iPad</span>
-        <p>Une fois l'interface affichée dans Safari, appuyez sur le bouton de partage (le carré avec une flèche vers le haut) et sélectionnez <strong>"Sur l'écran d'accueil"</strong>. Cela créera une icône d'application Mada POS directement sur l'iPad pour un accès rapide en plein écran.</p>
-    </div>
-
-    <div class="alert alert-warning" style="margin-top: 40px;">
-        <strong>Rappel d'exploitation :</strong> Le logiciel Mada POS doit impérativement rester ouvert sur l'ordinateur central (Windows) pendant tout le service. S'il est fermé, la base de données s'arrête et tous les iPads afficheront une erreur de connexion.
-    </div>
-
-    <div class="footer">
-        Architecture déployée via CI/CD — Master Dev Protocol
-    </div>
-</div>
-
+    <div class="footer">Système Mada POS © 2026 - Tous droits réservés.</div>
 </body>
 </html>
