@@ -3,44 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guide Pro - Mada POS</title>
+    <title>Documentation Technique - Mada POS</title>
     <style>
-        body { font-family: 'Inter', sans-serif; color: #1e293b; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 40px 20px; background: #f1f5f9; }
-        .card { background: white; padding: 40px; border-radius: 20px; shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .badge { background: #0f172a; color: white; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: bold; }
-        h1 { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 10px; }
-        .step { margin-bottom: 30px; padding-left: 20px; border-left: 4px solid #3b82f6; }
-        .step h2 { font-size: 18px; margin-bottom: 5px; color: #3b82f6; }
-        code { background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-weight: bold; color: #ef4444; }
-        .footer { text-align: center; margin-top: 40px; color: #64748b; font-size: 14px; }
+        body { font-family: "Helvetica", "Arial", sans-serif; line-height: 1.5; color: #1a1a1a; max-width: 800px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; }
+        .header { border-bottom: 2px solid #000000; padding-bottom: 10px; margin-bottom: 30px; }
+        .header h1 { font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+        .header p { font-size: 14px; color: #666666; margin: 5px 0 0 0; }
+        .section { margin-bottom: 25px; }
+        .section h2 { font-size: 18px; border-bottom: 1px solid #eeeeee; padding-bottom: 5px; margin-bottom: 10px; color: #000000; }
+        .instruction { margin-bottom: 15px; }
+        .instruction strong { display: block; margin-bottom: 5px; text-decoration: underline; }
+        code { font-family: "Courier New", monospace; background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
+        .note { background-color: #f9f9f9; border: 1px solid #dddddd; padding: 15px; margin-top: 20px; font-size: 13px; }
+        .note-title { font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        @media print {
+            body { padding: 0; }
+            .card { border: none; }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <span class="badge">V1.1 STABLE</span>
-        <h1>Guide de Mise en Service - Mada POS</h1>
-        <p>Suivez ces étapes pour transformer votre PC en serveur de restaurant.</p>
 
-        <div class="step">
-            <h2>1. Préparation du Serveur</h2>
-            <p>Lancez le fichier <code>Mada POS.exe</code>. Lors de l'alerte Windows, cliquez sur <b>"Informations complémentaires"</b> puis <b>"Exécuter quand même"</b>.</p>
+    <div class="header">
+        <h1>MADA POS - NOTICE TECHNIQUE D'INSTALLATION</h1>
+        <p>Version 1.1 Stable - Système de Gestion de Caisse Local</p>
+    </div>
+
+    <div class="section">
+        <h2>1. Installation du Serveur (PC Windows)</h2>
+        <div class="instruction">
+            <strong>Extraction des composants</strong>
+            Décompressez l'intégralité du dossier ZIP reçu avant toute manipulation. Ne lancez pas l'application directement depuis l'archive.
         </div>
-
-        <div class="step">
-            <h2>2. Configuration du Réseau</h2>
-            <p>Vérifiez que le PC est sur le Wi-Fi du restaurant. Dans l'administration (5 clics sur le titre), entrez l'adresse IP du PC (ex: <code>192.168.1.132</code>).</p>
+        <div class="instruction">
+            <strong>Exécution initiale</strong>
+            Lancez le fichier <code>Mada POS.exe</code>. Si une alerte de sécurité Windows s'affiche, cliquez sur "Informations complémentaires" puis sur "Exécuter quand même".
         </div>
-
-        <div class="step">
-            <h2>3. Accès Client & Personnel</h2>
-            <p>Scannez le QR Code généré dans le Dashboard ou tapez l'adresse IP suivie de <code>:5000</code> dans Safari/Chrome sur vos tablettes.</p>
-        </div>
-
-        <div class="step">
-            <h2>4. Gestion des Données</h2>
-            <p>Les photos et la base de données sont sauvegardées automatiquement dans votre dossier <code>%AppData%/Roaming/Mada POS</code>.</p>
+        <div class="instruction">
+            <strong>Autorisation réseau</strong>
+            Lors de la demande d'accès au réseau par le Pare-feu, veillez à cocher la case "Réseaux privés" pour autoriser la communication avec les tablettes.
         </div>
     </div>
-    <div class="footer">Système Mada POS © 2026 - Tous droits réservés.</div>
+
+    <div class="section">
+        <h2>2. Configuration du Réseau Local</h2>
+        <div class="instruction">
+            <strong>Connectivité</strong>
+            Le PC serveur et les terminaux clients (iPhone, iPad, Android) doivent impérativement être connectés au même réseau Wi-Fi.
+        </div>
+        <div class="instruction">
+            <strong>Accès Client</strong>
+            Ouvrez le navigateur Safari ou Chrome sur l'appareil mobile et saisissez l'adresse IP locale du serveur suivie du port 5000 (Exemple : <code>http://192.168.1.132:5000</code>).
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. Administration du Système</h2>
+        <div class="instruction">
+            <strong>Accès au Dashboard</strong>
+            Sur l'interface principale du PC, effectuez 5 clics rapides sur le titre "Mada POS" pour déverrouiller l'accès administrateur. Le code PIN d'accès par défaut est <code>1234</code>.
+        </div>
+        <div class="instruction">
+            <strong>Gestion du Catalogue</strong>
+            L'ajout de produits nécessite la création préalable d'au moins une catégorie (Exemple : Boissons, Plats). Enregistrez la catégorie avant de tenter d'ajouter un plat.
+        </div>
+    </div>
+
+    <div class="note">
+        <span class="note-title">Maintenance et Stabilité</span>
+        En cas d'inactivité prolongée du serveur, un gel de l'état de chargement peut survenir sur les terminaux clients. Pour résoudre cette latence, effectuez un rafraîchissement de la page sur l'appareil mobile. Veillez à désactiver la mise en veille prolongée du PC serveur pour garantir une disponibilité continue du service.
+    </div>
+
+    <div style="margin-top: 30px; font-size: 10px; text-align: center; color: #999999;">
+        Document généré le 25 Février 2026 - Ortus Mada POS System Proprietary Documentation.
+    </div>
+
 </body>
 </html>
